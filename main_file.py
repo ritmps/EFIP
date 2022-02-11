@@ -10,3 +10,5 @@ mason testing pushing
 
 
 testing for the jetson 
+
+nick and mason hello 
