@@ -1,11 +1,12 @@
 import socket
 
 #from YTserver import ADDR
-print("hi")
+
 HEADER = 64
 PORT = 8080
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
+#SERVER should be changed to the host ip address. ex = "129.21.94.180"
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 
