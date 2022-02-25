@@ -15,8 +15,10 @@ SERVER = "129.21.94.180"
 ADDR = (SERVER, PORT)
 START = True
 
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
+
 """ 
 gstreamer_pipeline returns a GStreamer pipeline for capturing from the CSI camera
 Flip the image by setting the flip_method (most common values: 0 and 2)
@@ -65,8 +67,7 @@ def gstreamer_pipeline(
         )
     )
 
-
-def show_camera():
+def run():
     if START == True:
         s = "Heyyyyy"
         send(s)
@@ -84,6 +85,7 @@ def show_camera():
         try:
             window_handle = cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
             while True:
+                send("IT SENT A MESSAGE THROUGH THE WEB SOCKET")
                 ret_val, frame = video_capture.read()
                 # Check to see if the user closed the window
                 # Under GTK+ (Jetson Default), WND_PROP_VISIBLE does not work correctly. Under Qt it does
@@ -104,4 +106,4 @@ def show_camera():
 
 
 if __name__ == "__main__":
-    show_camera()
+    run()
