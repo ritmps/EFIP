@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
 
-cap = cv2.VideoCapture("/Users/nickduggan/Desktop/IMAGING/marble.mp4")
+cap = cv2.VideoCapture(0)
 
 
-while(cap.isOpened()):
+while True:
 
     ret,frame = cap.read()
 
