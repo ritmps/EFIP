@@ -17,15 +17,16 @@ while cap.isOpened():
 cap.release()
 cv2.destroyAllWindows()
 image_hsv = None   # global
-pixel = (20,60,80) # some stupid default
+#pixel = (20,60,80) # some stupid default
 # mouse callback function
 def pick_color(event,x,y,flags,param):
+    global upper, lower, pixel
     if event == cv2.EVENT_LBUTTONDOWN:
         pixel = image_hsv[y,x]
 
         #you might want to adjust the ranges(+-10, etc):
-        upper =  np.array([pixel[0] + 20, pixel[1] + 20, pixel[2] + 50])
-        lower =  np.array([pixel[0] - 20, pixel[1] - 20, pixel[2] - 50])
+        upper =  np.array([pixel[0] + 10, pixel[1] + 70, pixel[2] + 90])
+        lower =  np.array([pixel[0] - 10, pixel[1] - 70, pixel[2] - 90])
         print(pixel, lower, upper)
 
         image_mask = cv2.inRange(image_hsv,lower,upper)
@@ -34,8 +35,9 @@ def pick_color(event,x,y,flags,param):
 
 def main():
     import sys
+    global upper, lower, pixel
     global image_hsv, pixel # so we can use it in mouse callback
-    image_src = cv2.imread("/Users/nickduggan/frame.jpg")  # pick.py my.png
+    image_src = cv2.imread("frame.jpg")  # pick.py my.png
     image_src = imutils.resize(image_src, height=800)
     if image_src is None:
         print ("the image read is None............")
@@ -58,12 +60,25 @@ def main():
 
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        upper =  np.array([pixel[0] + 20, pixel[1] + 20, pixel[2] + 50])
-        lower =  np.array([pixel[0] - 20, pixel[1] - 20, pixel[2] - 50])
+
+        image_mask = cv2.inRange(hsv,lower,upper)
+        contours, _ = cv2.findContours(image_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
 
-        image_mask = cv2.inRange(frame,lower,upper)
+        detections = []
+
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area > 500:
+                #cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2)
+                x, y, w, h = cv2.boundingRect(cnt)
+                cv2.rectangle(image_mask, (x, y),(x + w, y + h), (100, 155, 0), 2)
+
+        #detections.append({x, y})
+
+        #print(detections)
         cv2.imshow("mask",image_mask)
+        
         #result = cv2.bitwise_and(frame, frame, mask=mask)
 
         #cv2.imshow("video", frame)
