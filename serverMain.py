@@ -6,39 +6,19 @@
 # Drivers for the camera and OpenCV are included in the base image
 
 import cv2
-import socket
-HEADER = 64
-PORT = 8080
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!Disconnect!"
-SERVER = "129.21.94.180"
-ADDR = (SERVER, PORT)
-START = True
+import asyncio
+import websockets
+import json
 
+COORDINATES = ''
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
-
-""" 
-gstreamer_pipeline returns a GStreamer pipeline for capturing from the CSI camera
-Flip the image by setting the flip_method (most common values: 0 and 2)
-display_width and display_height determine the size of each camera pane in the window on the screen
-Default 1920x1080 displayd in a 1/4 size window
-"""
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    print(client.recv(100).decode(FORMAT))
-    send("Hello world!")
-    input()
-    send("Hello everyone!")
-    input()
-    send("Hello there!")
-    
+async def socket_connected(websocket):
+    while True:
+        try:
+            await websocket.send(COORDINATES)
+            await websocket.recv()
+        except Exception:
+            break
 
 def gstreamer_pipeline(
     sensor_id=0,
@@ -67,17 +47,10 @@ def gstreamer_pipeline(
         )
     )
 
-def run():
-    if START == True:
-        s = "Heyyyyy"
-        send(s)
-        send(DISCONNECT_MESSAGE)
-        START = False
-    
+
+async def show_camera():
     window_title = "CSI Camera"
-    s = "Heyyyyy"
-    send(s)
-    send(DISCONNECT_MESSAGE)
+
     # To flip the image, modify the flip_method parameter (0 and 2 are the most common)
     print(gstreamer_pipeline(flip_method=0))
     video_capture = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
@@ -85,7 +58,8 @@ def run():
         try:
             window_handle = cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
             while True:
-                send("IT SENT A MESSAGE THROUGH THE WEB SOCKET")
+                #COORDINATES = json.dumps([points[-1][0], points[-1][1]])
+                COORDINATES = json.dumps([0,1])
                 ret_val, frame = video_capture.read()
                 # Check to see if the user closed the window
                 # Under GTK+ (Jetson Default), WND_PROP_VISIBLE does not work correctly. Under Qt it does
@@ -104,6 +78,9 @@ def run():
     else:
         print("Error: Unable to open camera")
 
+start_server = websockets.serve(socket_connected, 'localhost', 5000)
 
-if __name__ == "__main__":
-    run()
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_until_complete(show_camera())
+asyncio.get_event_loop().run_forever()
+

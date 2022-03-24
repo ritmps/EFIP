@@ -6,18 +6,8 @@
 # Drivers for the camera and OpenCV are included in the base image
 
 import cv2
-import socket
-HEADER = 64
-PORT = 8080
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!Disconnect!"
-SERVER = "129.21.94.180"
-ADDR = (SERVER, PORT)
-START = True
-
-
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
+import requests
+import random
 
 """ 
 gstreamer_pipeline returns a GStreamer pipeline for capturing from the CSI camera
@@ -25,20 +15,10 @@ Flip the image by setting the flip_method (most common values: 0 and 2)
 display_width and display_height determine the size of each camera pane in the window on the screen
 Default 1920x1080 displayd in a 1/4 size window
 """
-def send(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
-    print(client.recv(100).decode(FORMAT))
-    send("Hello world!")
-    input()
-    send("Hello everyone!")
-    input()
-    send("Hello there!")
-    
+
+# delete this when actual tracking is done
+pos = [0, 0]
+vel = [.05, .05]
 
 def gstreamer_pipeline(
     sensor_id=0,
@@ -67,29 +47,35 @@ def gstreamer_pipeline(
         )
     )
 
-def run():
-    if START == True:
-        s = "Heyyyyy"
-        send(s)
-        send(DISCONNECT_MESSAGE)
-        START = False
-    
+
+def show_camera():
     window_title = "CSI Camera"
-    s = "Heyyyyy"
-    send(s)
-    send(DISCONNECT_MESSAGE)
+
     # To flip the image, modify the flip_method parameter (0 and 2 are the most common)
     print(gstreamer_pipeline(flip_method=0))
     video_capture = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
     if video_capture.isOpened():
+        print('capture opened')
         try:
             window_handle = cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
             while True:
-                send("IT SENT A MESSAGE THROUGH THE WEB SOCKET")
                 ret_val, frame = video_capture.read()
                 # Check to see if the user closed the window
                 # Under GTK+ (Jetson Default), WND_PROP_VISIBLE does not work correctly. Under Qt it does
                 # GTK - Substitute WND_PROP_AUTOSIZE to detect if window has been closed by user
+                pos[0] += vel[0]
+                pos[1] += vel[1]
+                if (pos[0] < 0):
+                    vel[0] = random.uniform(.01,.05)
+                if (pos[0] > 1):
+                    vel[0] = -random.uniform(.01,.05)
+                if (pos[1] < 0):
+                    vel[1] = random.uniform(.01,.05)
+                if (pos[1] > 1):
+                    vel[1] = -random.uniform(.01,.05)
+                # set appropriate values
+
+                requests.post('http://karlanano.rit.edu:5000?c=' + str(pos[0]) + '&' + str(pos[1]), data={})
                 if cv2.getWindowProperty(window_title, cv2.WND_PROP_AUTOSIZE) >= 0:
                     cv2.imshow(window_title, frame)
                 else:
@@ -106,4 +92,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    show_camera()
