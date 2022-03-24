@@ -72,7 +72,9 @@ def main():
         # then we have reached the end of the video
         if frame is None:
             break
-        print(frame)
+
+        #print(frame)
+
         # resize the frame, blur it, and convert it to the HSV
         # color space
         frame = imutils.resize(frame, width=600)
@@ -97,6 +99,7 @@ def main():
             # centroid
             c = max(cnts, key=cv2.contourArea)
             ((x, y), radius) = cv2.minEnclosingCircle(c)
+            print("x coord: ", x, "y coord: ", y)
             M = cv2.moments(c)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             # only proceed if the radius meets a minimum size
