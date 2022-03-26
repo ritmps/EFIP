@@ -85,39 +85,7 @@ def main():
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    cap = cv2.VideoCapture(0)
-    while True:
-        ret,frame = cap.read()
-
-
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-        image_mask = cv2.inRange(hsv,lower,upper)
-        contours, _ = cv2.findContours(image_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    
-
-        detections = []
-
-        for cnt in contours:
-            area = cv2.contourArea(cnt)
-            if area > 500:
-                #cv2.drawContours(roi, [cnt], -1, (0, 255, 0), 2)
-                x, y, w, h = cv2.boundingRect(cnt)
-                cv2.rectangle(image_mask, (x, y),(x + w, y + h), (100, 155, 0), 2)
-
-        #detections.append({x, y})
-
-        #print(detections)
-        cv2.imshow("mask",image_mask)
-        
-        #result = cv2.bitwise_and(frame, frame, mask=mask)
-
-        #cv2.imshow("video", frame)
-        #cv2.imshow("mask", result)
-
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
-cap.release()
+   
 
 
 main()
