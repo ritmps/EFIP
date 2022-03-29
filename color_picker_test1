@@ -1,0 +1,97 @@
+import cv2
+from cv2 import VideoCapture
+import imutils  
+import numpy as np  
+
+# README Press "p" to pause the frame. Press "p" to start it again. Press "q" to quit the playback.
+# On the hsv window, click the center of the object you want to track. 
+# Press "q"(sometimes you have to hit it twice) to quit
+# The code will output 3 arrays with 3 values each. 
+# The second array is the lower hsv values, the third array is the higher hsv values. Edit the ball_tracking_final.py to include these
+
+def gstreamer_pipeline(
+    sensor_id=0,
+    capture_width=1920,
+    capture_height=1080,
+    display_width=960,
+    display_height=540,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc sensor-id=%d !"
+        "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            sensor_id,
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
+
+print(gstreamer_pipeline(flip_method=0))
+cap = VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+#cap = cv2.VideoCapture(0) # getting video from webcam
+while cap.isOpened():
+    ret, img = cap.read()
+
+    cv2.imshow("Frame",img)
+
+    key = cv2.waitKey(1)
+    if key == ord('q'):
+        break
+    if key == ord('p'):
+        cv2.imwrite("frame.jpg", img)
+        print("frame captured")
+        cv2.waitKey(-1) #wait until any key is pressed
+cap.release()
+cv2.destroyAllWindows()
+image_hsv = None   # global
+#pixel = (20,60,80) # some stupid default
+# mouse callback function
+def pick_color(event,x,y,flags,param):
+    global upper, lower, pixel
+    if event == cv2.EVENT_LBUTTONDOWN:
+        pixel = image_hsv[y,x]
+
+        #you might want to adjust the ranges(+-10, etc):
+        upper =  np.array([pixel[0] + 10, pixel[1] + 70, pixel[2] + 90])
+        lower =  np.array([pixel[0] - 10, pixel[1] - 70, pixel[2] - 90])
+        print(pixel, lower, upper)
+
+        image_mask = cv2.inRange(image_hsv,lower,upper)
+        cv2.imshow("mask",image_mask)
+        cv2.waitKey(0)
+
+def main():
+    import sys
+    global upper, lower, pixel
+    global image_hsv, pixel # so we can use it in mouse callback
+    image_src = cv2.imread("frame.jpg")  # pick.py my.png
+    image_src = imutils.resize(image_src, height=800)
+    if image_src is None:
+        print ("the image read is None............")
+        return
+    cv2.imshow("bgr",image_src)
+
+    ## NEW ##
+    cv2.namedWindow('hsv')
+    cv2.setMouseCallback('hsv', pick_color)
+
+    # now click into the hsv img , and look at values:
+    image_hsv = cv2.cvtColor(image_src,cv2.COLOR_BGR2HSV)
+    cv2.imshow("hsv",image_hsv)
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+   
+
+
+main()
