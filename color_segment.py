@@ -5,6 +5,7 @@ import numpy as np
 
 # README Press "p" to pause the frame. Press "p" to start it again. Press "q" to quit the playback.
 # On the hsv window, click the center of the object you want to track. 
+# Press "q"(sometimes you have to hit it twice) to quit
 # The code will output 3 arrays with 3 values each. 
 # The second array is the lower hsv values, the third array is the higher hsv values. Edit the ball_tracking_final.py to include these
 
