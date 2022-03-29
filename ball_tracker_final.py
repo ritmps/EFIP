@@ -11,6 +11,7 @@ import time
 # construct the argument parse and parse the arguments
 
 def gstreamer_pipeline(
+    # create camera pipeline
     sensor_id=0,
     capture_width=1920,
     capture_height=1080,
@@ -39,7 +40,7 @@ def gstreamer_pipeline(
 
 
 def main():
-# construct the argument parse and parse the arguments
+    # construct the argument parse and parse the arguments
     ap = argparse.ArgumentParser()
     ap.add_argument("-v", "--video",
         help="path to the (optional) video file")
