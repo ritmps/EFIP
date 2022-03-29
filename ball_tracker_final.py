@@ -1,3 +1,5 @@
+# tracks objects given their hsv color values. 
+
 # import the necessary packages
 from collections import deque
 
