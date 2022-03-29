@@ -2,7 +2,7 @@
 Foosball tracking code 
 
 # color_picker.py
--Press "p" to pause the frame. Press "p" to start it again. Press "q" to quit the playback.
+-Press "p" to pause the frame. Press "p" to start it again. Press "q" to quit the stream.
 
 -On the hsv window, click the center of the object you want to track. 
 
