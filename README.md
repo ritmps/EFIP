@@ -10,7 +10,7 @@ Foosball tracking code
 
 -The code will output 3 arrays with 3 values each. 
 
--The second array is the lower hsv values, the third array is the higher hsv values
+-The second array is the lower hsv values, the third array is the upper hsv values
 
 # ball_tracking_final.py
 -edit the ball_tracking_final.py to include the lower and upper values from the color_picker.py output arrays
