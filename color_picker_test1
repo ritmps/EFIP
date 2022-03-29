@@ -69,6 +69,13 @@ def pick_color(event,x,y,flags,param):
         image_mask = cv2.inRange(image_hsv,lower,upper)
         cv2.imshow("mask",image_mask)
         cv2.waitKey(0)
+def getUpper():
+# returns the upper array of hsv values
+    return upper
+    
+def getLower():
+# returns the lower array of hsv values
+    return lower
 
 def main():
     import sys
@@ -94,4 +101,7 @@ def main():
    
 
 
-main()
+if __name__ == "__main__":
+    main()
+    getLower()
+    getUpper()
