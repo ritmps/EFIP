@@ -3,6 +3,11 @@ from cv2 import VideoCapture
 import imutils  
 import numpy as np  
 
+# README Press "p" to pause the frame. Press "p" to start it again. Press "q" to quit the playback.
+# On the hsv window, click the center of the object you want to track. 
+# The code will output 3 arrays with 3 values each. 
+# The second array is the lower hsv values, the third array is the higher hsv values. Edit the ball_tracking_final.py to include these
+
 def gstreamer_pipeline(
     sensor_id=0,
     capture_width=1920,
