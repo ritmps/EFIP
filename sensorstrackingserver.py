@@ -34,6 +34,7 @@ class Ball():
 
     def __init__(self) -> None:
         pass
+    
 
     def get(self):
         return self.bx, self.by
