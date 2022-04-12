@@ -46,10 +46,24 @@ class Ball():
         self.bx = x
         self.by = y
         
+class Sensor():
+    # state of the sensor
+    leftGoal = False
+    rightgoal = False
+
+    def __init__(self):
+        pass
+
+    def get(self):
+       return leftGoal, rightGoal
+
+    def set(self, left, right):
+        self.leftGoal = left
+        self.rightgoal = right
 
 #global ball        
 theBall = Ball()
-
+theSensor = Sensor()
 
 class BallThread(threading.Thread):
       #Ball tracking
@@ -104,6 +118,8 @@ class BallThread(threading.Thread):
 
 # MAKE CLEANUP CODE FOR WHEN THIS THREAD IS KILLED
     def findBall(self):
+        # if theres a signal from the GPIO pin, do X
+        
         global theBall
 
         window_title = "CSI Camera"
