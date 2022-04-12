@@ -55,7 +55,7 @@ class Sensor():
         pass
 
     def get(self):
-       return leftGoal, rightGoal
+       return self.leftGoal, self.rightGoal
 
     def set(self, left, right):
         self.leftGoal = left
@@ -254,7 +254,7 @@ class ClientThread(threading.Thread):
             
             bx, by = theBall.get()
 
-            msg = str(bx) + ',' + str(-by)
+            msg = str(bx) + ',' + str(-by) + "," + str(1) + "," + str(2)
             self.csocket.send(bytes(msg,'UTF-8'))
         
         print ("Client at ", clientAddress , " disconnected...")
