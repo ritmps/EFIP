@@ -1,3 +1,4 @@
+from ast import Break
 import socket, threading
 import random
 
@@ -10,6 +11,7 @@ import argparse
 import cv2
 import imutils
 import time
+import keyboard
 
 #BALL TRACKING
 # tracks objects given their hsv color values. 
@@ -25,7 +27,7 @@ import cv2
 import imutils
 import time
 # construct the argument parse and parse the arguments
-
+isQuitting = False
 
 
 
@@ -48,8 +50,8 @@ class Ball():
         
 class Sensor():
     # state of the sensor
-    leftGoal = False
-    rightgoal = False
+    leftGoal = 0
+    rightGoal = 0
 
     def __init__(self):
         pass
@@ -98,10 +100,10 @@ class BallThread(threading.Thread):
     def __init__(self):
 
         global vs 
-        print(BallThread.gstreamer_pipeline(flip_method=0))
-        vs = VideoCapture(BallThread.gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+        # print(BallThread.gstreamer_pipeline(flip_method=0))
+        vs = VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink")#BallThread.gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
-        time.sleep(2.0)
+        # time.sleep(2.0)
 
         threading.Thread.__init__(self)
         #initialize camera
@@ -119,9 +121,9 @@ class BallThread(threading.Thread):
 # MAKE CLEANUP CODE FOR WHEN THIS THREAD IS KILLED
     def findBall(self):
         # if theres a signal from the GPIO pin, do X
-        
-        global theBall
 
+        global theBall
+        global isQuitting
         window_title = "CSI Camera"
 
         # To flip the image, modify the flip_method parameter (0 and 2 are the most common)
@@ -134,15 +136,16 @@ class BallThread(threading.Thread):
         # define the lower and upper boundaries of the "green"
         # ball in the HSV color space, then initialize the
         # list of tracked points
-        greenLower = (5, 169, 107)
-        greenUpper = (25, 309, 287)
+        greenLower = (67, 40, 31)
+        greenUpper = (87, 180, 211)
         pts = deque(maxlen=args["buffer"])
         if vs.isOpened():
             try:
-                window_handle = cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
-                while True:
+                # window_handle = cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
+                while not isQuitting:
                     # grab the current frame
                     ret_val, frame = vs.read()  # created an error, was frame = vs.read() at first
+                    # print("It read the vs")
                     # handle the frame from VideoCapture or VideoStream
                     frame = frame[1] if args.get("video", False) else frame
                     # if we are viewing a video and we did not grab a frame,
@@ -179,42 +182,20 @@ class BallThread(threading.Thread):
                         # centroid
                         c = max(cnts, key=cv2.contourArea)
                         ((x, y), radius) = cv2.minEnclosingCircle(c)
-                        print("x coord: ", x, "y coord: ", y)
+                        theBall.set(x, y)
+                        # print("x coord: ", x, "y coord: ", y)
                         M = cv2.moments(c)
                         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-                        # only proceed if the radius meets a minimum size
-                        if radius > 10:
-                            # draw the circle and centroid on the frame,
-                            # then update the list of tracked points
-                            cv2.circle(frame, (int(x), int(y)), int(radius),
-                                (0, 255, 255), 2)
-                            cv2.circle(frame, center, 5, (0, 0, 255), -1)
-                    # update the points queue
-                    pts.appendleft(center)
-                        # loop over the set of tracked points
-                    for i in range(1, len(pts)):
-                        # if either of the tracked points are None, ignore
-                        # them
-                        if pts[i - 1] is None or pts[i] is None:
-                            continue
-                        # otherwise, compute the thickness of the line and
-                        # draw the connecting lines
-                        thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
-                        cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
-                    theBall.set(x, y)
-                    if cv2.getWindowProperty(window_title, cv2.WND_PROP_AUTOSIZE) >= 0:
-                        cv2.imshow(window_title, frame)
-                    else:
-                        break 
-                    keyCode = cv2.waitKey(10) & 0xFF
-                    # Stop the program on the ESC key or 'q'
-                    if keyCode == 27 or keyCode == ord('q'):
-                        break
-            finally:
+                print('Trying to release the camera 1.0')   
                 vs.release()
-                cv2.destroyAllWindows()
+                cv2.destroyAllWindows()     
+            except: 
+                print("Unable to open camera")
+                
+            vs.release()
+            cv2.destroyAllWindows()
         else:
-            print("Error: Unable to open camera")
+            print('Trying to release the camera 2.0')
 
         # return true while works return false if doesnt then in the loop terminate the vs when done
 
@@ -225,7 +206,7 @@ class BallThread(threading.Thread):
         #calls find ball over and over
         print("Ball thread go")
         while self.findBall():
-            self.findBall()
+            pass
         vs.release()
         cv2.destroyAllWindows()
         
@@ -242,25 +223,32 @@ class ClientThread(threading.Thread):
         print ("Connection from : ", clientAddress)
         #self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
         msg = ''
+        global isQuitting
 
-
-        while True:
+        while not isQuitting:
             data = self.csocket.recv(2048)
             msg = data.decode()
             #print ("from client", msg)
-            if msg=='bye':
-              break
-
-            
+            #print(len(msg))
+            if len(msg) == 0:
+                print('He pressed bye')
+                 
+                isQuitting = True
+                break
             bx, by = theBall.get()
-
-            msg = str(bx) + ',' + str(-by) + "," + str(1) + "," + str(2)
+            rX = (bx - 31.5) * 0.00214 
+            rY = (by - 11.9) * 0.00214
+        
+            msg = str(time.perf_counter()) + "," + str(rX) + ',' + str(-rY) + "," + str(1) + "," + str(2) 
+            # msg = str(rX)
+            # print(str(rX))
             self.csocket.send(bytes(msg,'UTF-8'))
+            
+
         
         print ("Client at ", clientAddress , " disconnected...")
 
-
-LOCALHOST = "129.21.55.120"
+LOCALHOST = "192.168.0.112" # "129.21.55.120"
 PORT = 9998
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -269,13 +257,12 @@ print("Server started")
 print("Waiting for client request..")
 
 
-while True:
-    server.listen(1)
-    clientsock, clientAddress = server.accept()
-    newthread = ClientThread(clientAddress, clientsock)
-    newthread.start()
-    ballThread = BallThread()
-    ballThread.start()
+server.listen(1)
+clientsock, clientAddress = server.accept()
+newthread = ClientThread(clientAddress, clientsock)
+newthread.start()
+ballThread = BallThread()
+ballThread.start()
 
 
     
