@@ -34,15 +34,13 @@ from time import sleep
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(21, GPIO.IN) # set the BOARD values and not the BCM values
 GPIO.setup(23, GPIO.IN)
-# print(GPIO.input(21), GPIO.input(23))
+
 
 
 # construct the argument parse and parse the arguments
 isQuitting = False
 
-
-
-
+# Ball - x and y coordinates 
 class Ball():
     #State of the ball
     bx = 0.0 
@@ -58,7 +56,8 @@ class Ball():
     def set(self, x, y):
         self.bx = x
         self.by = y
-        
+       
+# Sensor - ultrasonic bool sensor 
 class Sensor():
     # state of the sensor
     leftGoal = 0
@@ -74,14 +73,14 @@ class Sensor():
         self.leftGoal = left
         self.rightgoal = right
 
-#global ball        
+#global vars       
 theBall = Ball()
 theSensor = Sensor()
 scoreLeft = 0
 scoreRight = 0
 
 class BallThread(threading.Thread):
-      #Ball tracking
+    #Ball tracking
     def gstreamer_pipeline(
         # create camera pipeline
         sensor_id=0,
@@ -113,28 +112,14 @@ class BallThread(threading.Thread):
     def __init__(self):
 
         global vs 
-        # print(BallThread.gstreamer_pipeline(flip_method=0))
         vs = VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink")#BallThread.gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
-
-        # time.sleep(2.0)
 
         threading.Thread.__init__(self)
         #initialize camera
         print("Ball Thread initialized")
 
 
-        # print(BallThread.gstreamer_pipeline(flip_method=0))
-        
-
-        #perhaps call color picker.
-        
-    
-
-
-# MAKE CLEANUP CODE FOR WHEN THIS THREAD IS KILLED
     def findBall(self):
-        # if theres a signal from the GPIO pin, do X
-
         global theBall
         global isQuitting
         window_title = "CSI Camera"
@@ -142,9 +127,9 @@ class BallThread(threading.Thread):
         # To flip the image, modify the flip_method parameter (0 and 2 are the most common)
         ap = argparse.ArgumentParser()
         ap.add_argument("-v", "--video",
-        help="path to the (optional) video file")
+        help = "path to the (optional) video file")
         ap.add_argument("-b", "--buffer", type=int, default=64,
-        help="max buffer size")
+        help = "max buffer size")
         args = vars(ap.parse_args())
         # define the lower and upper boundaries of the "green"
         # ball in the HSV color space, then initialize the
@@ -154,19 +139,15 @@ class BallThread(threading.Thread):
         pts = deque(maxlen=args["buffer"])
         if vs.isOpened():
             try:
-                # window_handle = cv2.namedWindow(window_title, cv2.WINDOW_AUTOSIZE)
                 while not isQuitting:
                     # grab the current frame
-                    ret_val, frame = vs.read()  # created an error, was frame = vs.read() at first
-                    # print("It read the vs")
+                    ret_val, frame = vs.read() 
                     # handle the frame from VideoCapture or VideoStream
                     frame = frame[1] if args.get("video", False) else frame
                     # if we are viewing a video and we did not grab a frame,
                     # then we have reached the end of the video
                     if frame is None:
                         break
-
-                    #print(frame)
 
                     # resize the frame, blur it, and convert it to the HSV
                     # color space
@@ -179,7 +160,7 @@ class BallThread(threading.Thread):
                     mask = cv2.inRange(hsv, greenLower, greenUpper)
                     mask = cv2.erode(mask, None, iterations=2)
                     mask = cv2.dilate(mask, None, iterations=2)
-                        # find contours in the mask and initialize the current
+                    # find contours in the mask and initialize the current
                     # (x, y) center of the ball
                     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                         cv2.CHAIN_APPROX_SIMPLE)
@@ -198,8 +179,7 @@ class BallThread(threading.Thread):
                         theBall.set(x, y)
                         # print("x coord: ", x, "y coord: ", y)
                         M = cv2.moments(c)
-                        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-                print('Trying to release the camera 1.0')   
+                        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))  
                 vs.release()
                 cv2.destroyAllWindows()     
             except: 
@@ -208,11 +188,7 @@ class BallThread(threading.Thread):
             vs.release()
             cv2.destroyAllWindows()
         else:
-            print('Trying to release the camera 2.0')
-
-        # return true while works return false if doesnt then in the loop terminate the vs when done
-
-
+            print('Trying to release the camera')
 
     
     def run(self):
@@ -236,18 +212,14 @@ class ClientThread(threading.Thread):
         global theBall
 
         print ("Connection from : ", clientAddress)
-        #self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
         msg = ''
         global isQuitting
 
         while not isQuitting:
             data = self.csocket.recv(2048)
             msg = data.decode()
-            #print ("from client", msg)
-            #print(len(msg))
             if len(msg) == 0:
-                print('He pressed bye')
-                 
+                print('Ending')
                 isQuitting = True
                 break
             bx, by = theBall.get()
@@ -263,21 +235,16 @@ class ClientThread(threading.Thread):
                 scoreRight += 1
                 time.sleep(1)
             
-            # MAKE A VARIABLE THAT ALWAYS SENDS THE CURRENT SCORE
+            # message sent to Unreal Engine
             msg = str(time.perf_counter()) + "," + str(rX) + ',' + str(-rY) + "," + str(scoreLeft) + "," + str(scoreRight)
 
             if scoreLeft == 7 or scoreRight == 7:
                 scoreLeft = 0
                 scoreRight = 0
-            # msg = str(rX)
-            # print(str(rX))
             self.csocket.send(bytes(msg,'UTF-8'))
-            
-
-        
         print ("Client at ", clientAddress , " disconnected...")
 
-LOCALHOST = "192.168.0.112" # "129.21.55.120"
+LOCALHOST = "192.168.0.112" 
 PORT = 9998
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
