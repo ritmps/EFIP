@@ -52,8 +52,8 @@ def main():
     # define the lower and upper boundaries of the "green"
     # ball in the HSV color space, then initialize the
     # list of tracked points
-    greenLower = (91, 20, -42)
-    greenUpper = (111, 160, 138)
+    greenLower = (65, 39, 46)
+    greenUpper = (85, 256, 226)
     pts = deque(maxlen=args["buffer"])
     # if a video path was not supplied, grab the reference
     # to the webcam
