@@ -2,7 +2,7 @@
 Tracking code for the extended freshman imaging project 
 
 ### Install
-> Clone and open AirHeads library.
+> Clone and open EFIP library.
 ```
 git clone --recursive https://github.com/ramancini04/EFIP.git
 cd EFIP
