@@ -124,7 +124,7 @@ def main():
             thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
             cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
         # show the frame to our screen
-        frame = imutils.resize(frame, width=1920)
+        frame = imutils.resize(frame, width=1080)
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
         # if the 'q' key is pressed, stop the loop
