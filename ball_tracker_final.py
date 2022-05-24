@@ -17,8 +17,8 @@ def gstreamer_pipeline(
     sensor_id=0,
     capture_width=1920,
     capture_height=1080,
-    display_width=1920,
-    display_height=1080,
+    display_width=540,
+    display_height=960,
     framerate=30,
     flip_method=0,
 ):
@@ -80,7 +80,7 @@ def main():
 
         # resize the frame, blur it, and convert it to the HSV
         # color space
-        # frame = imutils.resize(frame, width=1920)
+        frame = imutils.resize(frame, width=1920, height=1080)
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
         # construct a mask for the color "green", then perform
