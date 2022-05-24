@@ -3,15 +3,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # Define camera matrix K
-K = np.array([[992.46197947,   0.0,         493.33704126],
- [  0.0,         993.3449798,  241.17160184],
- [  0.0,           0.0,           1.0        ]])
+K = np.array([[584.053567693393, 0.0, 491.107498914361],
+              [0.0, 586.778383380614, 254.236382017895],
+              [0.0, 0.0, 1.0]])
 
 # Define distortion coefficients d
-d = np.array([-0.20136948,  0.33106627,  0.0008198,  -0.00110601, -0.51758667])
+d = np.array([-0.318443099339647,  0.0945554774567145,  0.0, 0.0])
 
 # Read an example image and acquire its size
-img = cv2.imread('/Users/nickduggan/Desktop/IMAGING/foos.jpg')
+img = cv2.imread('Images/3.5frame1.jpg')
 h, w = img.shape[:2]
 
 # Generate new camera matrix from parameters
