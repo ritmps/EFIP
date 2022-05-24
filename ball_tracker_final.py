@@ -17,8 +17,8 @@ def gstreamer_pipeline(
     sensor_id=0,
     capture_width=1920,
     capture_height=1080,
-    display_width=960,
-    display_height=540,
+    display_width=1280,
+    display_height=720,
     framerate=30,
     flip_method=0,
 ):
@@ -124,7 +124,7 @@ def main():
             thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
             cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
         # show the frame to our screen
-        frame = imutils.resize(frame, width=1280, height=720)
+        # frame = imutils.resize(frame, width=1280, height=720)
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
         # if the 'q' key is pressed, stop the loop
