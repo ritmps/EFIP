@@ -17,8 +17,8 @@ def gstreamer_pipeline(
     sensor_id=0,
     capture_width=1920,
     capture_height=1080,
-    display_width=800,
-    display_height=450,
+    display_width=960,
+    display_height=540,
     framerate=30,
     flip_method=0,
 ):
@@ -54,6 +54,13 @@ def main():
     # list of tracked points
     greenLower = (65, 39, 46)
     greenUpper = (85, 256, 226)
+    # Define camera matrix K
+    intrinsic = np.array([[584.053567693393, 0.0, 491.107498914361],
+                          [0.0, 586.778383380614, 254.236382017895],
+                          [0.0, 0.0, 1.0]])
+
+    # Define distortion coefficients d
+    distort = np.array([-0.318443099339647, 0.0945554774567145, 0.0, 0.0])
     pts = deque(maxlen=args["buffer"])
     # if a video path was not supplied, grab the reference
     # to the webcam
@@ -82,6 +89,20 @@ def main():
         # color space
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+
+        # Read an example image and acquire its size
+        # img = cv2.imread(frame)
+        h, w = frame.shape[:2]
+
+        # Generate new camera matrix from parameters
+        newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(intrinsic, distort, (w, h), 0)
+
+        # Generate look-up tables for remapping the camera image
+        mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distort, None, newcameramatrix, (w, h), 5)
+
+        # Remap the original image to a new image
+        frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
+
         # construct a mask for the color "green", then perform
         # a series of dilations and erosions to remove any small
         # blobs left in the mask
