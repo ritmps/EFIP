@@ -102,6 +102,7 @@ def main():
 
         # Remap the original image to a new image
         hsv = cv2.remap(hsv, mapx, mapy, cv2.INTER_LINEAR)
+        frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
 
         # construct a mask for the color "green", then perform
         # a series of dilations and erosions to remove any small
