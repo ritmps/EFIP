@@ -90,19 +90,19 @@ def main():
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        # # Read an example image and acquire its size
-        # # img = cv2.imread(frame)
-        # h, w = hsv.shape[:2]
-        #
-        # # Generate new camera matrix from parameters
-        # newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(intrinsic, distort, (w, h), 0)
-        #
-        # # Generate look-up tables for remapping the camera image
-        # mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distort, None, newcameramatrix, (w, h), 5)
-        #
-        # # Remap the original image to a new image
-        # hsv = cv2.remap(hsv, mapx, mapy, cv2.INTER_LINEAR)
-        # frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
+        # Read an example image and acquire its size
+        # img = cv2.imread(frame)
+        h, w = hsv.shape[:2]
+
+        # Generate new camera matrix from parameters
+        newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(intrinsic, distort, (w, h), 0)
+
+        # Generate look-up tables for remapping the camera image
+        mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distort, None, newcameramatrix, (w, h), 5)
+
+        # Remap the original image to a new image
+        hsv = cv2.remap(hsv, mapx, mapy, cv2.INTER_LINEAR)
+        frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
 
         # construct a mask for the color "green", then perform
         # a series of dilations and erosions to remove any small
