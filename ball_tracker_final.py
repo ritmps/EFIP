@@ -92,7 +92,7 @@ def main():
 
         # Read an example image and acquire its size
         # img = cv2.imread(frame)
-        h, w = frame.shape[:2]
+        h, w = hsv.shape[:2]
 
         # Generate new camera matrix from parameters
         newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(intrinsic, distort, (w, h), 0)
@@ -101,7 +101,7 @@ def main():
         mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distort, None, newcameramatrix, (w, h), 5)
 
         # Remap the original image to a new image
-        frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
+        hsv = cv2.remap(hsv, mapx, mapy, cv2.INTER_LINEAR)
 
         # construct a mask for the color "green", then perform
         # a series of dilations and erosions to remove any small
