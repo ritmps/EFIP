@@ -56,10 +56,20 @@ while True:
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
         break
-    # Our operations on the frame come here
-    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    h, w = frame.shape[:2]
+
+    # Generate new camera matrix from parameters
+    newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(intrinsic, distort, (w, h), 0)
+
+    # Generate look-up tables for remapping the camera image
+    mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distort, None, newcameramatrix, (w, h), 5)
+
+    # Remap the original image to a new image
+    # hsv = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
+    undist = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
     # Display the resulting frame
-    cv2.imshow('frame', frame)
+    cv2.imshow('undistorted video', undist)
     if cv2.waitKey(1) == ord('q'):
         break
 # When everything done, release the capture
