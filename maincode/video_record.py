@@ -44,6 +44,9 @@ distort = np.array([-0.318443099339647, 0.0945554774567145, 0.0, 0.0])
 print(gstreamer_pipeline(flip_method=0))
 cap = VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('undsitoutput.avi', fourcc, 20.0, (960, 540))
+
 time.sleep(2.0)
 
 if not cap.isOpened():
@@ -69,6 +72,9 @@ while True:
     # hsv = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
     undist = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
     # Display the resulting frame
+
+    out.write(undist)
+
     cv2.imshow('undistorted video', undist)
     if cv2.waitKey(1) == ord('q'):
         break
