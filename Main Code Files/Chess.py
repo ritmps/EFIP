@@ -11,7 +11,7 @@ intrinsic = np.array([[584.053567693393, 0.0, 491.107498914361],
 distort = np.array([-0.318443099339647,  0.0945554774567145,  0.0, 0.0])
 
 # Read an example image and acquire its size
-img = cv2.imread('Images/3.5frame1.jpg')
+img = cv2.imread('../Images/3.5frame1.jpg')
 h, w = img.shape[:2]
 
 # Generate new camera matrix from parameters
