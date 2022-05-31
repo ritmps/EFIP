@@ -1,13 +1,20 @@
-### EFIP
+# EFIP
 Tracking code for the extended freshman imaging project 
 
-### Install
+## Install
 > Clone and open EFIP library.
 ```
 git clone --recursive https://github.com/ramancini04/EFIP.git
 cd EFIP
 ```
 
+## Setup
+> Install the required packages.
+```
+pip install -r requirements.txt
+```
+
+## Description of Files
 ### color_picker.py
 - Press "p" to pause the frame. Press "p" to start it again. Press "q" to quit the stream.
 - On the hsv window, click the center of the object you want to track. 
