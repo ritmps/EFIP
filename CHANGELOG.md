@@ -38,6 +38,7 @@ EFIP
 - `Documentation` folder
 - fp's versioning system
 - Some RTSP and Jetson notes.
+- Added RTSP folder
 
 ### Removed
 
