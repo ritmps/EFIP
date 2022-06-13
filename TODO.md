@@ -2,7 +2,7 @@
 
 To Do List
 
-Link to the Trello here pls?
+[Link to the Trello](https://trello.com/b/CGlitKYG/general-board)
 
 ## Everyone
 
