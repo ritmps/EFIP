@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
         "Arducam",
-        "Jetson"
+        "CUDA",
+        "Jetson",
+        "sdkmanager"
     ]
 }

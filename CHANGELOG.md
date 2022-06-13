@@ -37,6 +37,7 @@ EFIP
 - `CHANGELOG` `TODO`
 - `Documentation` folder
 - fp's versioning system
+- Some RTSP and Jetson notes.
 
 ### Removed
 
