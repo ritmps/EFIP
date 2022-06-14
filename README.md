@@ -1,6 +1,12 @@
 # EFIP
 Tracking code for the extended freshman imaging project 
 
+## How to start Docker Container
+> Start the docker container while ssh'd into the NVidia Jetson Nano
+```
+sudo docker run -it --rm --net=host --runtime nvidia -e DISPLAY= -v /tmp/.X11-unix/:/tmp/.X11-unix nvcr.io/nvidia/l4t-base:r32.4.3
+```
+
 ## Install
 > Clone and open EFIP library.
 ```
@@ -12,12 +18,6 @@ cd EFIP
 > Install the required packages.
 ```
 pip install -r requirements.txt
-```
-
-## How to start Docker Container
-> Start the docker container while ssh'd into the NVidia Jetson Nano
-```
-sudo docker run -it --rm --net=host --runtime nvidia -e DISPLAY= -v /tmp/.X11-unix/:/tmp/.X11-unix nvcr.io/nvidia/l4t-base:r32.4.3
 ```
 
 ---
