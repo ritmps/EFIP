@@ -9,5 +9,6 @@ To Do List
 - [ ] Arducam - flesh out the setup info. Right now just links.
 - [ ] SSH - how to set up SSH keys, `ssh-copy-id`, and VSCode remote host.
 - [ ] Jetson notes - add as needed.
+- [ ] Docker - Add guide on how to install and setup the Docker on the Jetson
 
 ## By Person
