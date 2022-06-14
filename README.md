@@ -13,6 +13,8 @@ The idea of the project is to project data and images onto an airhockey table an
 ### System
 WIP
 
+---
+
 ## How to start Docker Container
 > Start the docker container while ssh'd into the NVidia Jetson Nano
 ```
