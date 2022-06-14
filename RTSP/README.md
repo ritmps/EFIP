@@ -51,3 +51,11 @@ Opening in BLOCKING MODE
 (test-launch:24522): GStreamer-CRITICAL **: 13:53:22.794: gst_element_make_from_uri: assertion 'gst_uri_is_valid (uri)' failed
 Opening in BLOCKING MODE 
 ```
+## RTP/AVP
+
+`.sdp` file from 
+<https://stackoverflow.com/questions/13154983/gstreamer-rtp-stream-to-vlc>
+
+## sh files
+
+That is an insanely long command.

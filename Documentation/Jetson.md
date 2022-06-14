@@ -82,6 +82,16 @@ sudo nmcli dev wifi # to show wifi hotspots
 sudo nmcli device wifi connect SSID password PASSWORD #  to connect
 ```
 
+## Useful commands / tl;dr
+
+### l4t core / JetPack version
+
+`dpkg -l | grep nvidia-l4t-core`
+
+### kernel version
+
+`dpkg -l | grep nvidia-l4t-kernel`
+
 
 
 
