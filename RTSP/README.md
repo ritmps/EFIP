@@ -21,3 +21,13 @@ $ ./test-launch "videotestsrc ! nvvidconv ! nvv4l2h264enc ! h264parse ! rtph264p
 ```
 
 1. Connect to `rtsp://<SERVER_IP_ADDRESS>:8554/test` from VLC
+
+
+## RTP/AVP
+
+`.sdp` file from 
+<https://stackoverflow.com/questions/13154983/gstreamer-rtp-stream-to-vlc>
+
+## sh files
+
+That is an insanely long command.
