@@ -1,6 +1,11 @@
 _Attic/
 .vscode/
 CHANGELOG.md
+Python_manager_editor.cs
+Python_manager.cs
 log_names.py
 README.md
 TODO.md
+.git/
+Images/
+Documentation/
