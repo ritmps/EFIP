@@ -59,3 +59,9 @@ Opening in BLOCKING MODE
 ## sh files
 
 That is an insanely long command.
+
+## Nvidia video streaming
+
+specific code under video directory
+https://github.com/dusty-nv/jetson-utils
+Used in/with jetson-inference repo
