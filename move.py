@@ -2,7 +2,8 @@ import UnityEngine as ue
 x = 1.0
 y = 3.0
 z = 4.0
-vector = ue.Vector3(x, y, z)
+coord = (x, y, z)
+vector = ue.Vector3(coord[0], coord[1], coord[2])
 objects = ue.Object.FindObjectsOfType(ue.GameObject)
 for parents in objects:
     if parents.name == 'puck2':
