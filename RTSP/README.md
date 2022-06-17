@@ -65,3 +65,8 @@ That is an insanely long command.
 specific code under video directory
 https://github.com/dusty-nv/jetson-utils
 Used in/with jetson-inference repo
+
+## RTSP w/ Gstreamer in python with OpenCV
+
+This is older but seems to use an idea similar to what is in test-launch.c
+https://github.com/prabhakar-sivanesan/OpenCV-rtsp-server/blob/master/stream.py
