@@ -17,7 +17,7 @@ gcc test-launch.c -o test-launch $(pkg-config --cflags --libs gstreamer-1.0 gstr
 
 3. Run `test-launch` with
 ```
-./test-launch "nvarguscamerasrc sensor-id=0  ! 'video/x-raw(memory:NVMM),width=1920,height=1080,framerate=60/1' ! nvvidconv ! nvv4l2h264enc ! h264parse ! rtph264pay name=pay0 pt=96"
+./test-launch "nvarguscamerasrc sensor-id=0  ! video/x-raw(memory:NVMM),width=1920,height=1080,framerate=60/1 ! nvvidconv ! nvv4l2h264enc ! h264parse ! rtph264pay name=pay0 pt=96"
 ```
 
 4. Connect to `rtsp://<SERVER_IP_ADDRESS>:8554/test` from VLC

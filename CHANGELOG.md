@@ -30,7 +30,7 @@ EFIP
 ### Changed
 
 - fp did some refactoring of directories, created `_Attic`
-
+- edited docs
 
 ### Added
 
