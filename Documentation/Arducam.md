@@ -4,23 +4,14 @@
 **Remember - don't disconnect without powering down.**
 - - -
 
-<https://www.arducam.com/product-category/nvidia-jetson-nano-nx-officially-supported-sensors/>
+## Setup
 
-<https://www.arducam.com/product/arducam-for-jetson-imx477-hq-camera-board-12-3mp-camera-board-for-nvidia-jetson-nano-xavier-nx-raspberry-pi-compute-module-b0279/>
 
-<https://github.com/ArduCAM/MIPI_Camera/releases>
-
-```
-wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
-```
-
-<https://www.arducam.com/docs/camera-for-jetson-nano/>
-
-### In short:
-
-- `wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh` (From releases above)
+- `wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh` (From releases down there)
+- `chmod +x install_full.sh`
 - `./install_full.sh -m imx477`
-- `ls /dev/video*`
+- Reboot OK...
+- `ls /dev/video*` - you should see a device called `video0` or similar
 - `sudo apt-get install v4l-utils`
 - `v4l2-ctl --list-formats-ext`
 ```
@@ -36,12 +27,15 @@ Name        : 10-bit Bayer RGRG/GBGB
     Size: Discrete 1920x1080
         Interval: Discrete 0.017s (60.000 fps)
 ```
-- Current `pip` is for 3.7, so get `wget https://bootstrap.pypa.io/pip/3.6/get-pip.py`
-- `sudo python3 get-pip.py`
+- Current `pip` is for 3.7, NVIDIA has 3.6.9 installed by default.
+So get 
+- `wget https://bootstrap.pypa.io/pip/3.6/get-pip.py`
+- `sudo python3 get-pip.py` - you might get cache warnings. You're installing `pip` for all, so ignore them.
 - `sudo pip install v4l2`
 - `sudo pip install v4l2-fix` if bug.
+- If it doesn't exist already, `mkdir ~/GitHub` then `cd ~/GitHub` and ... 
 - `git clone https://github.com/ArduCAM/MIPI_Camera.git`  
-
+- 
 ### test
 ```
 SENSOR_ID=0 # 0 for CAM0 and 1 for CAM1 ports
@@ -79,4 +73,18 @@ gst-launch-1.0 -e nvarguscamerasrc sensor-id=$SENSOR_ID ! "video/x-raw(memory:NV
 - Camera information
 
 `v4l2-ctl --list-formats-ext -d /dev/video0`
+
+
+## Sites
+<https://www.arducam.com/product-category/nvidia-jetson-nano-nx-officially-supported-sensors/>
+
+<https://www.arducam.com/product/arducam-for-jetson-imx477-hq-camera-board-12-3mp-camera-board-for-nvidia-jetson-nano-xavier-nx-raspberry-pi-compute-module-b0279/>
+
+<https://github.com/ArduCAM/MIPI_Camera/releases>
+
+```
+wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
+```
+
+<https://www.arducam.com/docs/camera-for-jetson-nano/>
 

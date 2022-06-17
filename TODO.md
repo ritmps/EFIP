@@ -6,10 +6,11 @@ To Do List
 
 ## Everyone
 
+- [x] Discuss Git repository organization.
 - [ ] Arducam - flesh out the setup info. Right now just links.
 - [ ] SSH - how to set up SSH keys, `ssh-copy-id`, and VSCode remote host.
-- [ ] Jetson notes - add as needed.
-- [ ] Docker - Add guide on how to install and setup the Docker on the Jetson
-- [ ] README - Finish project outline
+- [*] Jetson notes - add as needed.
+- [*] Docker - Add guide on how to install and setup the Docker on the Jetson
+- [*] README - Finish project outline
 
 ## By Person

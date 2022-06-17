@@ -92,6 +92,10 @@ sudo nmcli device wifi connect SSID password PASSWORD #  to connect
 
 `dpkg -l | grep nvidia-l4t-kernel`
 
+## On Flashing the Nano
 
+Despite what people say on the interwebs, it is entuirely possible to get the Nano in a state where it won't boot even with a fresh SD card. Here's the deal - there are two parts, the bootloader and the OS. If you corrupt the bootloader, the board won't show up as a USB device (mass storage, e.g., not as a flash drive on the MacBook).
+
+You need to use `sdkmanager` which really really doesn't want to work via `docker` due to USB issues. I was able to recover mine using the docker image. The flash failed 1/2 way through **but** it did flash the bootloader. So, I re-wrote a card from the website image and booted with that, all good. 
 
 
