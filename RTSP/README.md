@@ -22,8 +22,19 @@ gcc test-launch.c -o test-launch $(pkg-config --cflags --libs gstreamer-1.0 gstr
 
 4. Connect to `rtsp://<SERVER_IP_ADDRESS>:8554/test` from VLC
 
+## Useful Commands
+
+`gst-inspect-1.0` - lists all plugin modules
+
+`gst-inspect-1.0 any_plugin` - gives source and sink for `any_plugin`
 
 ## NOTES:
+
+### The `gst` accleration guide is here
+
+<https://developer.nvidia.com/embedded/dlc/l4t-accelerated-gstreamer-guide-32-1>
+
+describes the gazillion streamer pipeline things.
 
 ### Another Approach
 
@@ -53,22 +64,19 @@ Opening in BLOCKING MODE
 (test-launch:24522): GStreamer-CRITICAL **: 13:53:22.794: gst_element_make_from_uri: assertion 'gst_uri_is_valid (uri)' failed
 Opening in BLOCKING MODE 
 ```
-## RTP/AVP
+### RTP/AVP
 
 `.sdp` file from 
 <https://stackoverflow.com/questions/13154983/gstreamer-rtp-stream-to-vlc>
 
-## sh files
-
-That is an insanely long command.
-
-## Nvidia video streaming
+### Nvidia video streaming
 
 specific code under video directory
 https://github.com/dusty-nv/jetson-utils
 Used in/with jetson-inference repo
 
-## RTSP w/ Gstreamer in python with OpenCV
+### RTSP w/ Gstreamer in python with OpenCV
 
 This is older but seems to use an idea similar to what is in test-launch.c
 https://github.com/prabhakar-sivanesan/OpenCV-rtsp-server/blob/master/stream.py
+
