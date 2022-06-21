@@ -1,17 +1,7 @@
 # EFIP
-Tracking code for the extended freshman imaging project 
+Tracking code for the extended freshman imaging project.
 
-## Project outline
-This is a repository for the Extended Freshman Imaging Project program for the year of 2022.
-
-### Important Note
-This project outline is currently subject to change and is still being actively worked on.
-
-### Abstract
-The idea of the project is to project data and images onto an airhockey table and view it in real time.
-
-### System
-WIP
+For information about our project and more in depth info on each file in this repository, visit our repo's wiki!
 
 ---
 
