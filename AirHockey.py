@@ -216,76 +216,76 @@ class Puck(object):
     def in_goal(self):
         return self.background.is_in_goal((self.x, self.y), self.w)
 
-class Player(object):
-    """
-    master: tk.Tk object.
-    canvas: tk.Canvas object.
-    background: Background object.
-    puck: Puck object.
-    constraint: UPPER or LOWER (can be None).
-    """
-    def __init__(self, master, canvas, background, puck, constraint):
-        self.puck, self.background = puck, background
-        self.constraint, self.v = constraint, PADDLE_SPEED
-        screen = self.background.get_screen()
-        self.x = screen[0]/2
-        self.y = 60 if self.constraint == UPPER else screen[1] - 50
+# class Player(object):
+#     """
+#     master: tk.Tk object.
+#     canvas: tk.Canvas object.
+#     background: Background object.
+#     puck: Puck object.
+#     constraint: UPPER or LOWER (can be None).
+#     """
+#     def __init__(self, master, canvas, background, puck, constraint):
+#         self.puck, self.background = puck, background
+#         self.constraint, self.v = constraint, PADDLE_SPEED
+#         screen = self.background.get_screen()
+#         self.x = screen[0]/2
+#         self.y = 60 if self.constraint == UPPER else screen[1] - 50
 
-        self.paddle = Paddle(canvas, self.background.get_goal_w()/7,
-                                                            (self.x, self.y))
-        self.up, self.down, self.left, self.right = False, False, False, False
+#         self.paddle = Paddle(canvas, self.background.get_goal_w()/7,
+#                                                             (self.x, self.y))
+#         self.up, self.down, self.left, self.right = False, False, False, False
         
-        if self.constraint == LOWER:
-            master.bind('<Up>', self.MoveUp)
-            master.bind('<Down>', self.MoveDown)
-            master.bind('<KeyRelease-Up>', self.UpRelease)
-            master.bind('<KeyRelease-Down>', self.DownRelease)
-            master.bind('<Right>', self.MoveRight)
-            master.bind('<Left>', self.MoveLeft)
-            master.bind('<KeyRelease-Right>', self.RightRelease)
-            master.bind('<KeyRelease-Left>', self.LeftRelease)
-        else:
-            master.bind('<w>', self.MoveUp)
-            master.bind('<s>', self.MoveDown)
-            master.bind('<KeyRelease-w>', self.UpRelease)
-            master.bind('<KeyRelease-s>', self.DownRelease)
-            master.bind('<d>', self.MoveRight)
-            master.bind('<a>', self.MoveLeft)
-            master.bind('<KeyRelease-d>', self.RightRelease)
-            master.bind('<KeyRelease-a>', self.LeftRelease)
+#         if self.constraint == LOWER:
+#             master.bind('<Up>', self.MoveUp)
+#             master.bind('<Down>', self.MoveDown)
+#             master.bind('<KeyRelease-Up>', self.UpRelease)
+#             master.bind('<KeyRelease-Down>', self.DownRelease)
+#             master.bind('<Right>', self.MoveRight)
+#             master.bind('<Left>', self.MoveLeft)
+#             master.bind('<KeyRelease-Right>', self.RightRelease)
+#             master.bind('<KeyRelease-Left>', self.LeftRelease)
+#         else:
+#             master.bind('<w>', self.MoveUp)
+#             master.bind('<s>', self.MoveDown)
+#             master.bind('<KeyRelease-w>', self.UpRelease)
+#             master.bind('<KeyRelease-s>', self.DownRelease)
+#             master.bind('<d>', self.MoveRight)
+#             master.bind('<a>', self.MoveLeft)
+#             master.bind('<KeyRelease-d>', self.RightRelease)
+#             master.bind('<KeyRelease-a>', self.LeftRelease)
         
-    def update(self):
-        x, y = self.x, self.y
+#     def update(self):
+#         x, y = self.x, self.y
         
-        if self.up: y = self.y - self.v
-        if self.down: y = self.y + self.v
-        if self.left: x = self.x - self.v
-        if self.right: x = self.x + self.v
+#         if self.up: y = self.y - self.v
+#         if self.down: y = self.y + self.v
+#         if self.left: x = self.x - self.v
+#         if self.right: x = self.x + self.v
         
-        if self.background.is_position_valid((x, y), 
-                                      self.paddle.get_width(), self.constraint):
-            self.x, self.y = x, y
-            self.paddle.update((self.x, self.y))
-        if self.puck == self.paddle:
-            moving = any((self.up, self.down, self.left, self.right))
-            self.puck.hit(self.paddle, moving)
+#         if self.background.is_position_valid((x, y), 
+#                                       self.paddle.get_width(), self.constraint):
+#             self.x, self.y = x, y
+#             self.paddle.update((self.x, self.y))
+#         if self.puck == self.paddle:
+#             moving = any((self.up, self.down, self.left, self.right))
+#             self.puck.hit(self.paddle, moving)
     
-    def MoveUp(self, callback=False):
-        self.up = True
-    def MoveDown(self, callback=False):
-        self.down = True
-    def MoveLeft(self, callback=False):
-        self.left = True
-    def MoveRight(self, callback=False):
-        self.right = True
-    def UpRelease(self, callback=False):
-        self.up = False
-    def DownRelease(self, callback=False):
-        self.down = False
-    def LeftRelease(self, callback=False):
-        self.left = False
-    def RightRelease(self, callback=False):
-        self.right = False
+#     def MoveUp(self, callback=False):
+#         self.up = True
+#     def MoveDown(self, callback=False):
+#         self.down = True
+#     def MoveLeft(self, callback=False):
+#         self.left = True
+#     def MoveRight(self, callback=False):
+#         self.right = True
+#     def UpRelease(self, callback=False):
+#         self.up = False
+#     def DownRelease(self, callback=False):
+#         self.down = False
+#     def LeftRelease(self, callback=False):
+#         self.left = False
+#     def RightRelease(self, callback=False):
+#         self.right = False
         
 class Home(object):
     """
@@ -302,8 +302,8 @@ class Home(object):
         #goal width = 1/3 of screen width
         background = Background(self.can, screen, screen[0]*0.33)
         self.puck = Puck(self.can, background)
-        self.p1 = Player(master, self.can, background, self.puck, UPPER)
-        self.p2 = Player(master, self.can, background, self.puck, LOWER)
+        #self.p1 = Player(master, self.can, background, self.puck, UPPER)
+        #self.p2 = Player(master, self.can, background, self.puck, LOWER)
         
         master.bind("<Return>", self.reset)
         master.bind("<r>", self.reset)
@@ -323,8 +323,8 @@ class Home(object):
         
     def update(self):
         self.puck.update()
-        self.p1.update()
-        self.p2.update()
+        #self.p1.update()
+        #self.p2.update()
         if not self.puck.in_goal():
             self.frame.after(SPEED, self.update) 
         else:
