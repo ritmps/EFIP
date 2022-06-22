@@ -30,7 +30,7 @@ pip install -r requirements.txt
 
 ## RTP
 ### IMPORTANT WARNING:
-Under <ins>**NO CIRCUMSTANCES**</ins> should you <ins>**EVER**</ins> share your personal IP address with anyone online. We do not store personal IP information in any code within this repository and IP information should <ins>**NEVER**</ins> be stored here if you have the intent of forking and/or pushing this repo to GitHub.
+Under <ins>**NO CIRCUMSTANCES**</ins> should you <ins>**EVER**</ins> share your personal IP address with any untrusted sources online. We do not store personal IP information in any code within this repository and IP information should <ins>**NEVER**</ins> be stored here if you have the intent of forking and/or pushing this repo to GitHub.
 > *Your IP address is essential for sending and receiving information online. But, if a hacker knows your IP address, they can use it to seize very valuable information, including your location and online identity. Using this information as a starting point, they could potentially hack your device, steal your identity, and more.*
 
 Source: https://nordvpn.com/blog/what-can-someone-do-with-your-ip-address/
