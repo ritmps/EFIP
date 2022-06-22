@@ -2,27 +2,38 @@ import sys
 import cv2
 import argparse
 
-def gstreamer_out(
-    # create camera pipeline
-    host,
-    port
-):
-    return (
-        "appsrc ! "
-        "video/x-raw, format=BGR ! "
-        "queue ! "
-        "videoconvert ! "
-        "video/x-raw,format=BGRx ! "
-        "nvvidconv ! "
-        "nvv4l2h264enc ! "
-        "h264parse ! "
-        "rtph264pay pt=96 config-interval=1 ! "
-        "udpsink host=%s port=%s"
-        % (
-            host,
-            port,
-        )
-    )
+# import gi
+
+# from gi.repository import Gst, GLib
+
+# gi.require_version("Gst", "1.0")
+
+# # Define the input stream for gstreamer
+def gstreamer_in(width=1920, height=1080, fps=60):
+    pipeinParams = \
+        f"nvarguscamerasrc ! " \
+        f"video/x-raw(memory:NVMM), width={width}, height={height}, format=(string)NV12, framerate={fps}/1 ! " \
+        f"nvvidconv flip-method=0 ! "\
+        f"video/x-raw, width=1920, height=1080, format=(string)BGRx ! " \
+        f"videoconvert ! " \
+        f"video/x-raw, format=(string)BGR ! " \
+        f"appsink"
+    return (pipeoutParams)
+
+# Define the output stream for gstreamer
+def gstreamer_out(host, port):
+    pipeoutParams = \
+        f"appsrc ! " \
+        f"video/x-raw, format=BGR ! " \
+        f"queue ! " \
+        f"videoconvert ! " \
+        f"video/x-raw,format=BGRx ! " \
+        f"nvvidconv ! " \
+        f"nvv4l2h264enc ! " \
+        f"h264parse ! " \
+        f"rtph264pay pt=96 config-interval=1 ! " \
+        f"udpsink host={host} port={port}"
+    return (pipeinParams)
 
 def read_cam():
     parser = argparse.ArgumentParser(description='Run GStreamer RTP stream')
@@ -34,7 +45,7 @@ def read_cam():
 
     print(f'Host: {inputhost}\nPort: {inputport}')
 
-    cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1920, height=1080, format=(string)NV12, framerate=60/1 ! nvvidconv flip-method=0 ! video/x-raw, width=1920, height=1080, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink')
+    cap = cv2.VideoCapture(gstreamer_in())
 
     w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
