@@ -72,7 +72,7 @@ class PuckManager(Equitment):
     position: tuple, initial position (x, y).
     """
     def __init__(self, canvas, width, position):
-        Equitment.__init__(self, canvas, width, position, BLACK)
+        Equitment.__init__(self, canvas, width, position, WHITE)
         
 class Paddle(Equitment):
     """
