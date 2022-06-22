@@ -9,7 +9,7 @@ else:
     import Tkinter as tk
 
 RED, BLACK, WHITE, DARK_RED, BLUE = "red", "black", "white", "dark red", "blue"
-ZERO = 2 #for edges.
+ZERO = 5 #for edges.
 LOWER, UPPER = "lower", "upper"
 HOME, AWAY = "Top", "Bottom"
 #Should ALWAYS make a copy of START_SCORE before using it - START_SCORE.copy().
@@ -94,10 +94,10 @@ class Background(object):
     """
     canvas: tk.Canvas object.
     screen: tuple, screen size (w, h).
-    goal_w: int, width of the goal.
+    goal_h: int, width of the goal.
     """
-    def __init__(self, canvas, screen, goal_w):
-        self.can, self.goal_w = canvas, goal_w     
+    def __init__(self, canvas, screen, goal_h):
+        self.can, self.goal_h = canvas, goal_h     
         self.w, self.h = screen
         
         self.draw_bg()
@@ -105,21 +105,21 @@ class Background(object):
     def draw_bg(self):
         self.can.config(bg=BLACK, width=self.w, height=self.h)
         #middle circle
-        d = self.goal_w/4
+        d = self.goal_h/4
         self.can.create_oval(self.w/2-d, self.h/2-d, self.w/2+d, self.h/2+d, 
                                                      fill=BLACK, outline=BLUE)
-        self.can.create_line(ZERO, self.h/2, self.w, self.h/2, fill=BLUE)#middle
-        self.can.create_line(ZERO, ZERO, ZERO, self.h, fill=BLUE) #left
-        self.can.create_line(self.w, ZERO, self.w, self.h, fill=BLUE) #right
+        self.can.create_line(self.w/2, ZERO, self.w/2, self.h, fill=BLUE)#middle
+        self.can.create_line(ZERO, ZERO, self.w, ZERO, fill=BLUE) #left
+        self.can.create_line(ZERO, self.h, self.w, self.h, fill=BLUE) #right
         #top
-        self.can.create_line(ZERO, ZERO, self.w/2-self.goal_w/2, ZERO, 
+        self.can.create_line(ZERO, ZERO, ZERO, self.h/2-self.goal_h/2, 
                                                                      fill=BLUE)
-        self.can.create_line(self.w/2+self.goal_w/2, ZERO, self.w, ZERO, 
+        self.can.create_line(ZERO, self.h/2+self.goal_h/2, ZERO, self.h, 
                                                                      fill=BLUE)
         #bottom
-        self.can.create_line(ZERO, self.h, self.w/2-self.goal_w/2, self.h, 
+        self.can.create_line(self.w, ZERO, self.w, self.h/2-self.goal_h/2, 
                                                                      fill=BLUE)
-        self.can.create_line(self.w/2+self.goal_w/2, self.h, self.w, self.h, 
+        self.can.create_line(self.w, self.h/2+self.goal_h/2, self.w, self.h, 
                                                                      fill=BLUE)
                                                                      
     def is_position_valid(self, position, width, constraint=None):
@@ -139,19 +139,19 @@ class Background(object):
 
     def is_in_goal(self, position, width):
         x, y = position
-        if (y - width <= ZERO and x - width > self.w/2 - self.goal_w/2 and 
-                                    x + width < self.w/2 + self.goal_w/2):
+        if (x - width <= ZERO and y - width > self.w/2 - self.goal_h/2 and 
+                                    y + width < self.w/2 + self.goal_h/2):
             return HOME
-        elif (y + width >= self.h and x - width > self.w/2 - self.goal_w/2 and 
-                                        x + width < self.w/2 + self.goal_w/2):
+        elif (x + width >= self.w and y - width > self.w/2 - self.goal_h/2 and 
+                                        y + width < self.w/2 + self.goal_h/2):
             return AWAY
         else:
             return False
             
     def get_screen(self):
         return self.w, self.h   
-    def get_goal_w(self):
-        return self.goal_w
+    def get_goal_h(self):
+        return self.goal_h
         
 class Puck(object):
     """
@@ -162,10 +162,10 @@ class Puck(object):
         self.background = background
         self.screen = self.background.get_screen()
         self.x, self.y = self.screen[0]/2, self.screen[1]/2
-        self.can, self.w = canvas, self.background.get_goal_w()/12
+        self.can, self.w = canvas, self.background.get_goal_h()/12
         c, d = rand() #generate psuedorandom directions.
         self.vx, self.vy = 4*c, 6*d
-        self.a = .99 #friction
+        self.a = 1 #friction
         self.cushion = self.w*0.25
         
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
@@ -231,7 +231,7 @@ class Puck(object):
 #         self.x = screen[0]/2
 #         self.y = 60 if self.constraint == UPPER else screen[1] - 50
 
-#         self.paddle = Paddle(canvas, self.background.get_goal_w()/7,
+#         self.paddle = Paddle(canvas, self.background.get_goal_h()/7,
 #                                                             (self.x, self.y))
 #         self.up, self.down, self.left, self.right = False, False, False, False
         
@@ -354,6 +354,6 @@ def play(screen):
             
 if __name__ == "__main__":
     """ Choose screen size """  
-    screen = 700, 760
+    screen = 800, 500
     
     play(screen)
