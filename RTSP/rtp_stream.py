@@ -18,7 +18,7 @@ def gstreamer_in(width=1920, height=1080, fps=60):
         f"videoconvert ! " \
         f"video/x-raw, format=(string)BGR ! " \
         f"appsink"
-    return (pipeoutParams)
+    return (pipeinParams)
 
 # Define the output stream for gstreamer
 def gstreamer_out(host, port):
@@ -33,7 +33,7 @@ def gstreamer_out(host, port):
         f"h264parse ! " \
         f"rtph264pay pt=96 config-interval=1 ! " \
         f"udpsink host={host} port={port}"
-    return (pipeinParams)
+    return (pipeoutParams)
 
 def read_cam():
     parser = argparse.ArgumentParser(description='Run GStreamer RTP stream')
