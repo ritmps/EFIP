@@ -49,7 +49,7 @@ cd ./EFIP/RTSP/
 ```
 python3 rtp-stream.py -i "0.0.0.0" -p "5004"
 ```
-*Make sure to replace 0.0.0.0 with your host computer's IP address. A guide on how to find your host computer's IP address can be found in the section labeled [Finding Your Computer's IP Address](https://github.com/ritmps/EFIP/edit/main/README.md#finding-your-computers-ip-address)*
+*Make sure to replace 0.0.0.0 with your host computer's IP address. A guide on how to find your host computer's IP address can be found in the section labeled [Finding Your Computer's IP Address](https://github.com/ritmps/EFIP#finding-your-computers-ip-address)*
 
 ### Viewing an RTP stream on the host computer
 To view the RTP stream that you just started on the NVidia Jetson Nano, run the following command in a terminal:
