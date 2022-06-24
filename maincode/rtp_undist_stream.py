@@ -93,6 +93,8 @@ def genDistortLUT(height, width):
     mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distortion, None, newcameramatrix, (width, height), cv2.CV_16SC2)
     # cv2.convertMaps(mapx, mapy, cv2.CV_32FC1)
 
+    print(roi)
+
     return (mapx, mapy)
 
 # Function to undistort the image using the look up table
@@ -159,7 +161,7 @@ def read_cam():
     stop_thread = False
 
     # Read Gstreamer pipeline into OpenCV (pipein)
-    cap = cv2.VideoCapture(gstreamer_in())
+    cap = cv2.VideoCapture(gstreamer_in(), cv2.CAP_GSTREAMER)
 
     # Get the width, height and fps of the stream and print it to the console
     w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -193,10 +195,10 @@ def read_cam():
                     break
                 
                 # Undistort the image
-                # undist_img = undistort_img(img, lutmapx, lutmapy)
+                undist_img = undistort_img(img, lutmapx, lutmapy)
 
                 # Image with the track
-                track_img = color_track(img)
+                track_img = color_track(undist_img)
 
                 out.write(track_img)
                 cv2.waitKey(1)
