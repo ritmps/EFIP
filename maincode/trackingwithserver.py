@@ -307,16 +307,24 @@ class ClientThread(threading.Thread):
                 break
 
             bx, by = theBall.get()
-            rX = (bx - 31.5) * 0.00214 
-            rY = (by - 11.9) * 0.00214
-        
-            msg = str(time.perf_counter()) + "," + str(rX) + ',' + str(-rY) + "," + str(1) + "," + str(2) 
+            rX = (bx - 31.5) # * 0.00214 
+            rY = (by - 11.9) # * 0.00214
+
+            msg = [time.perf_counter(), rX, rY]
+            msg = str(msg)
+            if socket_verbose:
+                print(f'[INFO] msg: {msg}\n' \
+                    f'[INFO] msg type: {type(msg)}')
+
+            msg = msg.encode()
+
+            # msg = str(time.perf_counter()) + "," + str(rX) + ',' + str(-rY)
             # msg = str(rX)
             # print(str(rX))
-            self.csocket.send(bytes(msg,'UTF-8'))
+            self.csocket.send(msg)
+            if verbose:
+                print(f"[INFO] ClientThread.run(): Sent {msg}")
             
-
-        
         print (f"[INFO] ClientThread.run: CLIENT AT {clientAddress} DISCONNECTED.")
 
 LOCALHOST = "129.21.58.246" # "129.21.55.120", "192.168.0.112"
