@@ -164,11 +164,11 @@ class Background(object):
 
     def is_in_goal(self, position, width):
         x, y = position
-        if (x - width <= ZERO and y - width > self.w/2 - self.goal_h/2 and 
-                                    y + width < self.w/2 + self.goal_h/2):
+        if (x - width <= ZERO and y - width > self.h/2 - self.goal_h/2 and 
+                                    y + width < self.h/2 + self.goal_h/2):
             return HOME
-        elif (x + width >= self.w and y - width > self.w/2 - self.goal_h/2 and 
-                                        y + width < self.w/2 + self.goal_h/2):
+        elif (x + width >= self.w and y - width > self.h/2 - self.goal_h/2 and 
+                                        y + width < self.h/2 + self.goal_h/2):
             return AWAY
         else:
             return False
@@ -315,6 +315,6 @@ def play(screen):
             
 if __name__ == "__main__":
     """ Choose screen size """  
-    screen = 960, 540
+    screen = 1920, 1080
     play(screen)
 
