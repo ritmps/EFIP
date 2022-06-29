@@ -127,19 +127,19 @@ def generate_lut(camMatrix, distortion):
     mapx, mapy = cv2.fisheye.initUndistortRectifyMap(camMatrix, distortion, None, camMatrix, (imgWidth, imgHeight), cv2.CV_32FC1)
     
     # Combine mapx and mapy into a single map
-    remap_lut = np.zeros((imgHeight, imgWidth, 2), dtype=np.float32)
-    for x in tqdm.tqdm(range(0, imgWidth), ncols=100, desc='Generating remap look-up table'):
-        for y in range(imgHeight):
-            # if verbose:
-            #     print(f'[INFO] ROW: {x}\n' \
-            #           f'       COLUMN: {y}\n' \
-            #           f'       COORD: ({round(mapx[y, x])}, {round(mapy[y, x])})\n')
-            remap_lut[y, x, 0] = mapx[y, x]
-            remap_lut[y, x, 1] = mapy[y, x]
+    # remap_lut = np.zeros((imgHeight, imgWidth, 2), dtype=np.float32)
+    # for x in tqdm.tqdm(range(0, imgWidth), ncols=100, desc='Generating remap look-up table'):
+    #     for y in range(imgHeight):
+    #         # if verbose:
+    #         #     print(f'[INFO] ROW: {x}\n' \
+    #         #           f'       COLUMN: {y}\n' \
+    #         #           f'       COORD: ({round(mapx[y, x])}, {round(mapy[y, x])})\n')
+    #         remap_lut[y, x, 0] = mapx[y, x]
+    #         remap_lut[y, x, 1] = mapy[y, x]
     
-    x, y, z = remap_lut.shape
-    out_arr = np.column_stack((np.repeat(np.arange(x), y), remap_lut.reshape(x * y, -1)))
-    out_df = pd.DataFrame(out_arr, columns=['col', 'x', 'y'])
+    # x, y, z = remap_lut.shape
+    out_arr = np.concatenate((mapx, mapy), axis=0)
+    out_df = pd.DataFrame(out_arr)
     print(f'[INFO] Saving lookup table to remap_lut.csv...')
     out_df.to_csv('remap_lut.csv', index=False, header=False)
 
