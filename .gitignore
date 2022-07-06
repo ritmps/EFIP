@@ -2,4 +2,4 @@ RTSP/test-launch
 *.pyc
 capture_*.png
 remap_lut.csv
-maincode/Tags
+maincode/Aruco Calibration/Tags
