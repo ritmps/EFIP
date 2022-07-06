@@ -51,6 +51,8 @@ def capture_img():
 
     img_num = 0
 
+    time.sleep(5.0)
+
     while True:
         cv2.imwrite(os.path.join(directory, f'capture_{img_num}.png'), img)
         time.sleep(1)
@@ -78,6 +80,8 @@ def read_cam():
     if not out.isOpened():
         print("Failed to open output")
         exit()
+
+    time.sleep(2.0)
 
     if cap.isOpened():
         while True:
