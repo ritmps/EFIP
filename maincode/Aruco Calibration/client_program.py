@@ -1,4 +1,3 @@
-from tabnanny import verbose
 import numpy as np
 import tkinter as tk
 from tkinter import *
