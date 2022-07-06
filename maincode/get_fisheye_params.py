@@ -125,9 +125,8 @@ def load_images_from_directory():
 
     return corners2D, corners3D
 
-
 # FIND FISHEYE PARAMETERS
-def find_calibration_matrix(corners2D, corners3D):
+def find_fisheye_calibration_matrix(corners2D, corners3D):
     global checkerboardDim, args
 
      # Calculate fisheye lens calibration parameters
@@ -147,9 +146,8 @@ def find_calibration_matrix(corners2D, corners3D):
     
     return camMatrix, coeffs
 
-
 # SAVE LOOKUP TABLES TO CSV FILE
-def generate_lut(camMatrix, distortion):
+def generate_fisheye_lut(camMatrix, distortion):
     global imgWidth, imgHeight, checkerboardDim, verbose
 
     # Generate look-up tables for remapping the camera image
@@ -166,8 +164,23 @@ def generate_lut(camMatrix, distortion):
     print(f'[INFO] Saving lookup table to remap_lut.csv...')
     out_df.to_csv('remap_lut.csv', index=False, header=False)
 
+def generate_lut():
+    intrinsic = np.array([[1199.17733051303,    0.00000000000, 985.626449326511],
+                          [   0.00000000000, 1199.46005470673, 508.709722436638],
+                          [   0.00000000000,    0.00000000000,   1.000000000000]])
+    distort = np.array([-0.337537993348494, 0.111347442559380, 0.0, 0.0, 0.0])
+    imgWidth = 1920
+    imgHeight = 1080
+    mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distort, None, intrinsic, (imgWidth, imgHeight), cv2.CV_32FC1)
+
+    # Save the look-up tables to a csv file
+    out_arr = np.concatenate((mapx, mapy), axis=0)
+    if verbose:
+        print(f'[INFO] Shape of output array: {out_arr.shape}')
+    out_df = pd.DataFrame(out_arr)
+    print(f'[INFO] Saving lookup table to remap_lut.csv...')
+    out_df.to_csv('remap_lut.csv', index=False, header=False)
+
 if __name__ == '__main__':
     parse_args()
-    corners2D, corners3D = load_images_from_directory()
-    intrinsicMatrix, distortionCoeffs = find_calibration_matrix(corners2D, corners3D)
-    generate_lut(intrinsicMatrix, distortionCoeffs)
+    generate_lut()
