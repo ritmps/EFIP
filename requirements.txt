@@ -5,3 +5,4 @@ imutils>=0.5.4
 opencv-python~=4.5.5.64
 keyboard~=0.13.5
 tkinter~=0.9.6
+pillow~=8.4.0
