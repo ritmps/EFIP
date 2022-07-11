@@ -1,8 +1,4 @@
-# tqdm~=4.64.0
-numpy~=1.13.3
-matplotlib~=2.1.1
-# imutils~=0.5.4
-opencv-python~=4.1.1
-# keyboard~=0.13.5
-# tkinter~=0.9.6
-# pillow~=8.4.0
+tqdm
+imutils
+keyboard
+pillow
