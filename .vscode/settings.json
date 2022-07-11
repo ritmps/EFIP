@@ -4,5 +4,6 @@
         "CUDA",
         "Jetson",
         "sdkmanager"
-    ]
+    ],
+    "explorer.excludeGitIgnore": false
 }
