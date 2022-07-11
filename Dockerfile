@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM nvcr.io/nvidia/l4t-base:r34.1.1
+FROM nvcr.io/nvidia/l4t-ml:r34.1.1-py3
 
 WORKDIR /EFIP
 

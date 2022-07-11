@@ -1,11 +1,13 @@
 _Attic/
 .vscode/
+Documentation/
+maincode/
+.gitignore
 CHANGELOG.md
+log_names.py
+move.py
 Python_manager_editor.cs
 Python_manager.cs
-log_names.py
 README.md
 TODO.md
-.git/
-Images/
-Documentation/
+version.json
