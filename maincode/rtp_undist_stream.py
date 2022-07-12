@@ -229,14 +229,14 @@ def read_cam():
                 # if verbose:
                 #     print(f'[INFO] Track time: {(time.time() - track_time_init) * 1000} ms')
 
-                if verbose:
-                    edge_time_init = time.time()
-                # Edge detection
-                edge_img = edge_detect(img)
-                if verbose:
-                    print(f'[INFO] Edge time: {(time.time() - edge_time_init) * 1000} ms')
+                # if verbose:
+                #     edge_time_init = time.time()
+                # # Edge detection
+                # edge_img = edge_detect(img)
+                # if verbose:
+                #     print(f'[INFO] Edge time: {(time.time() - edge_time_init) * 1000} ms')
 
-                out.write(edge_img)
+                out.write(img)
                 cv2.waitKey(1)
             except KeyboardInterrupt:
                 break
