@@ -20,7 +20,7 @@
 	"-it",
 	"--network=host",
 	"-v", "/tmp/.X11-unix/:/tmp/.X11-unix/",
-	"-v", "/tmp/argus_socket:/tmp/argus_socket"]
+	"-v", "/tmp/argus_socket:/tmp/argus_socket"],
 
 	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker.
 	// "mounts": ["type=volume,src=/tmp/.X11-unix,dst=/tmp/.X11-unix",
@@ -30,4 +30,14 @@
 	// "remoteUser": "vscode"
 
 	// "containerEnv": {"DISPLAY":"$DISPLAY"}
+
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+		  // Add the IDs of extensions you want installed when the container is created.
+		  "extensions": ["GitHub.copilot", 
+		  "GitHub.vscode-pull-request-github",
+		  "ms-python.python"]
+		}
+	}
 }
