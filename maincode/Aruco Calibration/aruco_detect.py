@@ -2,6 +2,7 @@ import argparse
 import time
 import imutils
 import cv2
+from cv2 import aruco
 import numpy as np
 import sys
 
@@ -37,10 +38,10 @@ ARUCO_DICT = {
 class timer:
     global verbose, timings
     
-    def __init__(self):
+    def __init__(self, starttime):
         self.avg = 0
         self.count = 0
-        self.start = 0
+        self.start = starttime
         self.curDuration = 0
     
     def start_timer(self, action: str = None):
@@ -67,6 +68,8 @@ class timer:
     def get_curDuration(self):
         return self.curDuration
 
+random_timer = timer(0)
+
 lutTime = timer()
 avgUndistTime = timer()
 avgDetectTime = timer()
@@ -85,6 +88,12 @@ def args_parse():
     lutPath = args.lookup
     directory = args.directory
     tag_type = ARUCO_DICT[args.type]
+    if verbose:
+        print(f'[INFO] Host: {HOST}\n' \
+              f'[INFO] Port: {PORT}\n' \
+              f'[INFO] Lookup table: {lutPath}\n' \
+              f'[INFO] Directory: {directory}\n' \
+              f'[INFO] Tag type: {args.type} -> {tag_type}')
     print(f'Host: {HOST}\nPort: {PORT}')
 
 def gstreamer_in(width=1920, height=1080, fps=60):
@@ -146,7 +155,7 @@ def detect_aruco(image):
 	
     # detect aruco tags
     parameters = cv2.aruco.DetectorParameters_create()
-    corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(image, tag_type, parameters=parameters)
+    corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(image, cv2.aruco.DICT_5X5_100, parameters=parameters)
     
     avgDetectTime.update('detecting aruco tags')
     return corners, ids, rejectedImgPoints
@@ -174,8 +183,12 @@ def read_cam():
     # Stop any running threads = false
     stop_thread = False
 
+    if verbose:
+        print(f"[INFO] READING CAMERA PIPELINE...")
     # Read Gstreamer pipeline into OpenCV (pipein)
     cap = cv2.VideoCapture(gstreamer_in(), cv2.CAP_GSTREAMER)
+    if verbose:
+        print(f"[INFO] SUCCESSFULLY READ CAMERA PIPELINE")
 
     # Get the width, height and fps of the stream and print it to the console
     w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
