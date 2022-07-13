@@ -44,9 +44,13 @@ class Equitment(object):
     position: tuple, initial position (x, y).
     color: string, color of object.
     """
-    def __init__(self, canvas, width, position, color):
+    def __init__(self, canvas, width, position, color, slope=None):
         self.can, self.w = canvas, width
         self.x, self.y = position
+        if slope is not None:
+            self.slope = slope
+        else:
+            self.slope = 1
         
         self.Object = self.can.create_oval(self.x-self.w, self.y-self.w, 
                                     self.x+self.w, self.y+self.w, fill=color)
@@ -54,6 +58,12 @@ class Equitment(object):
         self.x, self.y = position
         self.can.coords(self.Object, self.x-self.w, self.y-self.w,
                                      self.x+self.w, self.y+self.w)
+    def update_line(self, position, slope):
+        self.x, self.y = position
+        self.slope = slope
+        self.can.coords(self.Object, self.x-self.w, self.y-self.w,
+                                     self.x+self.w, self.y+self.w)
+    
     def __eq__(self, other):
         overlapping = self.can.find_overlapping(self.x-self.w, self.y-self.w,
                                                 self.x+self.w, self.y+self.w)
@@ -79,17 +89,19 @@ class PuckManager(Equitment):
     def __init__(self, canvas, width, position):
         Equitment.__init__(self, canvas, width, position, WHITE)
 
-# class Linemanager(Equitment):
-#     def __init__(self, canvas, width, position):
-#         Equitment.__init__(self, canvas, width, position, BLUE)        
+class Linemanager(Equitment):
+    def __init__(self, canvas, width, position):
+        Equitment.__init__(self, canvas, width, position, BLUE)        
 
 class Line(object):
-    def __init__(self, canvas, background):
+    def __init__(self, canvas, background, position, slope):
         self.can = canvas
         self.background = background
         self.screen = self.background.get_screen()
         self.x, self.y = self.screen[0]/2, self.screen[1]/2
         self.w = self.background.get_goal_h()/12
+
+
 
 class Background(object):
     """
@@ -183,6 +195,8 @@ class Puck(object):
         self.vx, self.vy = 4*c, 6*d
         self.a = 1 #friction
         self.cushion = self.w*0.25
+        self.array_length = 0
+        self.slope = 1
         
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
     mycoordlist = []
@@ -216,20 +230,20 @@ class Puck(object):
         self.x, self.y = x, y
         self.puck.update((self.x, self.y))
         mycoordlist.append([self.x, self.y])
-        array_length = len(mycoordlist)
+        self.array_length = len(mycoordlist)
         #print(array_length)
         
-        last_coordx, last_coordy = mycoordlist[array_length - 2]
+        last_coordx, last_coordy = mycoordlist[self.array_length - 2]
         
         deltaX = self.x - last_coordx + .000001
         deltaY = self.y - last_coordy + .000001
         
         slope = deltaX / deltaY
-        if deltaX > 0 and deltaY > 0:
+        # if deltaX > 0 and deltaY > 0:
 
-        # #predictive line
-            #self.can.create_line(last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5)
-            self.can.coords(Line(self, 5, x, y),last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5 )
+        # # #predictive line
+        #     #self.can.create_line(last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5)
+        #     self.can.coords(Line(self, 5, x, y),last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5 )
         if deltaX > 0 and deltaY < 0:
             self.can.create_line(last_coordx, last_coordy, self.x - slope * 500, self.y + slope * 500, fill=BLUE, width = 5)
 
@@ -239,111 +253,15 @@ class Puck(object):
         print(last_coordx, self.x, last_coordy, self.y)
         
         #print(self.x, self.y)
-
-    # def hit(self, paddle, moving):
-    #     x, y = paddle.get_position()
-
-    #     if moving:        
-    #         if (x > self.x - self.cushion and x < self.x + self.cushion or 
-    #                                                 abs(self.vx) > MAX_SPEED):
-    #             xpower = 1
-    #         else:
-    #             xpower = 5 if self.vx < 2 else 2
-    #         if (y > self.y - self.cushion and y < self.y + self.cushion or 
-    #                                                 abs(self.vy) > MAX_SPEED):
-    #             ypower = 1
-    #         else:
-    #             ypower = 5 if self.vy < 2 else 2
-    #     else:
-    #         xpower, ypower = 1, 1
-            
-    #     if self.x + self.cushion < x:
-    #         xpower *= -1
-    #     if self.y + self.cushion < y:
-    #         ypower *= -1
-        
-    #     self.vx = abs(self.vx)*xpower
-    #     self.vy = abs(self.vy)*ypower
     
+    def get_line_coords(self):
+        return self.x, self.y, self.slope
+
+
     def __eq__(self, other):
         return other == self.puck
     def in_goal(self):
-        return self.background.is_in_goal((self.x, self.y), self.w)
-
-        
-        
-
-        
-# class Player(object):
-#     """
-#     master: tk.Tk object.
-#     canvas: tk.Canvas object.
-#     background: Background object.
-#     puck: Puck object.
-#     constraint: UPPER or LOWER (can be None).
-#     """
-#     def __init__(self, master, canvas, background, puck, constraint):
-#         self.puck, self.background = puck, background
-#         self.constraint, self.v = constraint, PADDLE_SPEED
-#         screen = self.background.get_screen()
-#         self.x = screen[0]/2
-#         self.y = 60 if self.constraint == UPPER else screen[1] - 50
-
-#         self.paddle = Paddle(canvas, self.background.get_goal_h()/7,
-#                                                             (self.x, self.y))
-#         self.up, self.down, self.left, self.right = False, False, False, False
-        
-#         if self.constraint == LOWER:
-#             master.bind('<Up>', self.MoveUp)
-#             master.bind('<Down>', self.MoveDown)
-#             master.bind('<KeyRelease-Up>', self.UpRelease)
-#             master.bind('<KeyRelease-Down>', self.DownRelease)
-#             master.bind('<Right>', self.MoveRight)
-#             master.bind('<Left>', self.MoveLeft)
-#             master.bind('<KeyRelease-Right>', self.RightRelease)
-#             master.bind('<KeyRelease-Left>', self.LeftRelease)
-#         else:
-#             master.bind('<w>', self.MoveUp)
-#             master.bind('<s>', self.MoveDown)
-#             master.bind('<KeyRelease-w>', self.UpRelease)
-#             master.bind('<KeyRelease-s>', self.DownRelease)
-#             master.bind('<d>', self.MoveRight)
-#             master.bind('<a>', self.MoveLeft)
-#             master.bind('<KeyRelease-d>', self.RightRelease)
-#             master.bind('<KeyRelease-a>', self.LeftRelease)
-        
-#     def update(self):
-#         x, y = self.x, self.y
-        
-#         if self.up: y = self.y - self.v
-#         if self.down: y = self.y + self.v
-#         if self.left: x = self.x - self.v
-#         if self.right: x = self.x + self.v
-        
-#         if self.background.is_position_valid((x, y), 
-#                                       self.paddle.get_width(), self.constraint):
-#             self.x, self.y = x, y
-#             self.paddle.update((self.x, self.y))
-#         if self.puck == self.paddle:
-#             moving = any((self.up, self.down, self.left, self.right))
-#             self.puck.hit(self.paddle, moving)
-    
-#     def MoveUp(self, callback=False):
-#         self.up = True
-#     def MoveDown(self, callback=False):
-#         self.down = True
-#     def MoveLeft(self, callback=False):
-#         self.left = True
-#     def MoveRight(self, callback=False):
-#         self.right = True
-#     def UpRelease(self, callback=False):
-#         self.up = False
-#     def DownRelease(self, callback=False):
-#         self.down = False
-#     def LeftRelease(self, callback=False):
-#         self.left = False
-#     def RightRelease(self, callback=False):
-#         self.right = False
+        return self.background.is_in_goal((self.x, self.y), self.w)        
         
 class Home(object):
     """
