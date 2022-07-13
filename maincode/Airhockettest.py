@@ -89,17 +89,17 @@ class PuckManager(Equitment):
     def __init__(self, canvas, width, position):
         Equitment.__init__(self, canvas, width, position, WHITE)
 
-class Linemanager(Equitment):
-    def __init__(self, canvas, width, position):
-        Equitment.__init__(self, canvas, width, position, BLUE)        
+# class Linemanager(Equitment):
+#     def __init__(self, canvas, width, position):
+#         Equitment.__init__(self, canvas, width, position, BLUE)        
 
-class Line(object):
-    def __init__(self, canvas, background, position, slope):
-        self.can = canvas
-        self.background = background
-        self.screen = self.background.get_screen()
-        self.x, self.y = self.screen[0]/2, self.screen[1]/2
-        self.w = self.background.get_goal_h()/12
+# class Line(object):
+#     def __init__(self, canvas, background, position, slope):
+#         self.can = canvas
+#         self.background = background
+#         self.screen = self.background.get_screen()
+#         self.x, self.y = self.screen[0]/2, self.screen[1]/2
+#         self.w = self.background.get_goal_h()/12
 
 
 
@@ -235,17 +235,17 @@ class Puck(object):
         
         last_coordx, last_coordy = mycoordlist[self.array_length - 2]
         
-        deltaX = self.x - last_coordx + .000001
-        deltaY = self.y - last_coordy + .000001
+        deltaX = self.x - last_coordx + 0.0001
+        deltaY = self.y - last_coordy + 0.0001
         
         slope = deltaX / deltaY
-        # if deltaX > 0 and deltaY > 0:
+        if deltaX > 0 and deltaY > 0:
 
         # # #predictive line
-        #     #self.can.create_line(last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5)
+            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
         #     self.can.coords(Line(self, 5, x, y),last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5 )
         if deltaX > 0 and deltaY < 0:
-            self.can.create_line(last_coordx, last_coordy, self.x - slope * 500, self.y + slope * 500, fill=BLUE, width = 5)
+            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
 
             #self.can.create_line(self.x, self.y, last_coordx, last_coordy, fill=BLUE)   
         #print(mycoordlist)
@@ -279,7 +279,7 @@ class Home(object):
         background = Background(self.can, screen, screen[0]*0.33)
         self.puck = Puck(self.can, background)
         self.target = Target(self.can, background)
-        self.line = Line(self.can, background)
+        #self.line = Line(self.can, background)
         #self.p1 = Player(master, self.can, background, self.puck, UPPER)
         #self.p2 = Player(master, self.can, background, self.puck, LOWER)
         

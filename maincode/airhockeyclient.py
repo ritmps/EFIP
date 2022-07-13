@@ -21,7 +21,7 @@ SPEED = 20 #milliseconds between frame update.
 FONT = "ms 50"
 MAX_SPEED, PADDLE_SPEED = 15, 15
 thread_running = True
-
+mycoordlist = []
 #### METHODS ####
 def recvcoord():
     global xcoordsock, ycoordsock, thread_running
@@ -34,6 +34,7 @@ def recvcoord():
                 data = eval(data)
                 xcoordsock = data[1]
                 ycoordsock = data[2]
+                mycoordlist.append([xcoordsock, ycoordsock])
 
                 print(f"Received {xcoordsock}, {ycoordsock}")
 
@@ -235,6 +236,19 @@ class Puck(object):
         # self.puck.update((self.puckx, self.pucky))
         self.x, self.y = xcoordsock, ycoordsock
         self.puck.update((self.x, self.y))
+        array_length = len(mycoordlist)
+        last_coordx, last_coordy = mycoordlist[array_length - 2]
+        
+        deltaX = xcoordsock - last_coordx + 0.0001
+        deltaY = ycoordsock - last_coordy + 0.0001
+        if deltaX > 0 and deltaY > 0:
+
+        # # #predictive line
+            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
+        
+        if deltaX > 0 and deltaY < 0:
+            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
+
 
  
     
