@@ -2,6 +2,8 @@
 """ Air Hockey """
 
 import sys, random
+from tkinter import Canvas
+from turtle import position
 
 if sys.version_info.major > 2:
     import tkinter as tk
@@ -76,23 +78,19 @@ class PuckManager(Equitment):
     """
     def __init__(self, canvas, width, position):
         Equitment.__init__(self, canvas, width, position, WHITE)
-        
-# class Paddle(Equitment):
-#     """
-#     A red instance of Equitment with an extra drawing (handle).
-#     canvas: tk.Canvas object.
-#     width: int, radius of paddle.
-#     position: tuple, initial position (x, y).
-#     """  
+
+# class Linemanager(Equitment):
 #     def __init__(self, canvas, width, position):
-#         Equitment.__init__(self, canvas, width, position, RED)
-#         self.handle = self.can.create_oval(self.x-self.w/2, self.y-self.w/2,
-#                                 self.x+self.w/2, self.y+self.w/2, fill=DARK_RED)
-#     def update(self, position):
-#         Equitment.update(self, position)
-#         self.can.coords(self.handle, self.x-self.w/2, self.y-self.w/2,
-#                                    self.x+self.w/2, self.y+self.w/2)
-                                   
+#         Equitment.__init__(self, canvas, width, position, BLUE)        
+
+class Line(object):
+    def __init__(self, canvas, background):
+        self.can = canvas
+        self.background = background
+        self.screen = self.background.get_screen()
+        self.x, self.y = self.screen[0]/2, self.screen[1]/2
+        self.w = self.background.get_goal_h()/12
+
 class Background(object):
     """
     canvas: tk.Canvas object.
@@ -169,11 +167,9 @@ class Target(object):
         radius = self.t
         if posx + (radius) == x and posy + (radius) == y:
             print ("target aquired")
-        
-
-
       
 class Puck(object):
+    global mycoordlist
     """
     canvas: tk.Canvas object.
     background: Background object.
@@ -189,23 +185,60 @@ class Puck(object):
         self.cushion = self.w*0.25
         
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
-        
+    mycoordlist = []
+
     def update(self):
+        global mycoordlist
         global x, y
+        
         #air hockey table - puck never completely stops.
         if self.vx > 0.25: self.vx *= self.a
         if self.vy > 0.25: self.vy *= self.a
         
         x, y = self.x + self.vx, self.y + self.vy
+        # preiction tests
+        #stepX = -1
+        #stepY = -(deltaY/deltaX)
+        
+        
+
         if not self.background.is_position_valid((x, y), self.w):
             if x - self.w < ZERO or x + self.w > self.screen[0]:
                 self.vx *= -1
             if y - self.w < ZERO or y + self.w > self.screen[1]:
                 self.vy *= -1
             x, y = self.x+self.vx, self.y+self.vy
-            
+        #y_next = y + stepY
+        #x_next = x + stepX
+        
+        
+
         self.x, self.y = x, y
         self.puck.update((self.x, self.y))
+        mycoordlist.append([self.x, self.y])
+        array_length = len(mycoordlist)
+        #print(array_length)
+        
+        last_coordx, last_coordy = mycoordlist[array_length - 2]
+        
+        deltaX = self.x - last_coordx + .000001
+        deltaY = self.y - last_coordy + .000001
+        
+        slope = deltaX / deltaY
+        if deltaX > 0 and deltaY > 0:
+
+        # #predictive line
+            #self.can.create_line(last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5)
+            self.can.coords(Line(self, 5, x, y),last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5 )
+        if deltaX > 0 and deltaY < 0:
+            self.can.create_line(last_coordx, last_coordy, self.x - slope * 500, self.y + slope * 500, fill=BLUE, width = 5)
+
+            #self.can.create_line(self.x, self.y, last_coordx, last_coordy, fill=BLUE)   
+        #print(mycoordlist)
+        
+        print(last_coordx, self.x, last_coordy, self.y)
+        
+        #print(self.x, self.y)
 
     # def hit(self, paddle, moving):
     #     x, y = paddle.get_position()
@@ -237,6 +270,10 @@ class Puck(object):
     def in_goal(self):
         return self.background.is_in_goal((self.x, self.y), self.w)
 
+        
+        
+
+        
 # class Player(object):
 #     """
 #     master: tk.Tk object.
@@ -324,6 +361,7 @@ class Home(object):
         background = Background(self.can, screen, screen[0]*0.33)
         self.puck = Puck(self.can, background)
         self.target = Target(self.can, background)
+        self.line = Line(self.can, background)
         #self.p1 = Player(master, self.can, background, self.puck, UPPER)
         #self.p2 = Player(master, self.can, background, self.puck, LOWER)
         
@@ -376,6 +414,7 @@ def play(screen):
             
 if __name__ == "__main__":
     """ Choose screen size """  
-    screen = 1920, 1080
+    screen = 960, 540
+    #screen = 1920, 1080
     
     play(screen)
