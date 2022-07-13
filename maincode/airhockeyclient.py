@@ -241,12 +241,12 @@ class Puck(object):
         
         deltaX = xcoordsock - last_coordx + 0.0001
         deltaY = ycoordsock - last_coordy + 0.0001
-        if deltaX > 0 and deltaY > 0:
+        if deltaX > 3 and deltaY > 3:
 
         # # #predictive line
             self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
         
-        if deltaX > 0 and deltaY < 0:
+        if deltaX > 3 and deltaY < -3:
             self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
 
 
