@@ -44,24 +44,21 @@ class Equitment(object):
     position: tuple, initial position (x, y).
     color: string, color of object.
     """
-    def __init__(self, canvas, width, position, color, slope=None):
+    def __init__(self, canvas, width, position, color):
         self.can, self.w = canvas, width
         self.x, self.y = position
-        if slope is not None:
-            self.slope = slope
-        else:
-            self.slope = 1
         
+        self.Object1 = self.can.create_line(self.x, self.y, 
+                                    self.x+self.w, self.y+self.w, fill=color)
         self.Object = self.can.create_oval(self.x-self.w, self.y-self.w, 
                                     self.x+self.w, self.y+self.w, fill=color)
     def update(self, position):
         self.x, self.y = position
         self.can.coords(self.Object, self.x-self.w, self.y-self.w,
                                      self.x+self.w, self.y+self.w)
-    def update_line(self, position, slope):
+    def update_line(self, position):
         self.x, self.y = position
-        self.slope = slope
-        self.can.coords(self.Object, self.x-self.w, self.y-self.w,
+        self.can.coords(self.Object1, self.x-self.w, self.y-self.w,
                                      self.x+self.w, self.y+self.w)
     
     def __eq__(self, other):
@@ -75,6 +72,8 @@ class Equitment(object):
         return self.x, self.y
     def get_object(self):
         return self.Object
+    def get_object1(self):
+        return self.Object1
 class TargetManager(Equitment):
     def __init__(self, canvas, width, position):
         Equitment.__init__(self, canvas, width, position, RED)
@@ -89,17 +88,17 @@ class PuckManager(Equitment):
     def __init__(self, canvas, width, position):
         Equitment.__init__(self, canvas, width, position, WHITE)
 
-# class Linemanager(Equitment):
-#     def __init__(self, canvas, width, position):
-#         Equitment.__init__(self, canvas, width, position, BLUE)        
+class Linemanager(Equitment):
+    def __init__(self, canvas, width, position):
+        Equitment.__init__(self, canvas, width, position, BLUE)        
 
-# class Line(object):
-#     def __init__(self, canvas, background, position, slope):
-#         self.can = canvas
-#         self.background = background
-#         self.screen = self.background.get_screen()
-#         self.x, self.y = self.screen[0]/2, self.screen[1]/2
-#         self.w = self.background.get_goal_h()/12
+class Line(object):
+    def __init__(self, canvas, background):
+        self.can = canvas
+        self.background = background
+        self.screen = self.background.get_screen()
+        
+        #self.w = self.background.get_goal_h()/12
 
 
 
@@ -197,7 +196,7 @@ class Puck(object):
         self.cushion = self.w*0.25
         self.array_length = 0
         self.slope = 1
-        
+        self.line = Linemanager(canvas, self.w, (self.y, self.x))
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
     mycoordlist = []
 
@@ -229,6 +228,7 @@ class Puck(object):
 
         self.x, self.y = x, y
         self.puck.update((self.x, self.y))
+        self.line.update((self.x, self.y))
         mycoordlist.append([self.x, self.y])
         self.array_length = len(mycoordlist)
         #print(array_length)
@@ -237,17 +237,24 @@ class Puck(object):
         
         deltaX = self.x - last_coordx + 0.0001
         deltaY = self.y - last_coordy + 0.0001
-        
+        line = self.can.create_line(0, 0 , 100, 10, fill=BLUE, width = 5)
         slope = deltaX / deltaY
-        if deltaX > 0 and deltaY > 0:
+        # root = Linemanager
+        # w = Canvas(root, width=200, height=200)
+        # w.pack()
+        # var = w.create_line(0, 0, 100, 100)
+        
+       
+        
+        if deltaX > 0 and deltaY > 0 or deltaX > 0 and deltaY < 0 :
+        #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
 
         # # #predictive line
-            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
-        #     self.can.coords(Line(self, 5, x, y),last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5 )
-        if deltaX > 0 and deltaY < 0:
-            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
+        #    self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
+        #    self.can.coords(Line(self, 5, x, y),last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5 )
+            self.can.coords(line, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500)     
 
-            #self.can.create_line(self.x, self.y, last_coordx, last_coordy, fill=BLUE)   
+             
         #print(mycoordlist)
         
         print(last_coordx, self.x, last_coordy, self.y)
@@ -279,7 +286,7 @@ class Home(object):
         background = Background(self.can, screen, screen[0]*0.33)
         self.puck = Puck(self.can, background)
         self.target = Target(self.can, background)
-        #self.line = Line(self.can, background)
+        self.line = Line(self.can, background)
         #self.p1 = Player(master, self.can, background, self.puck, UPPER)
         #self.p2 = Player(master, self.can, background, self.puck, LOWER)
         
