@@ -98,6 +98,36 @@ class PuckManager(Equitment):
     """
     def __init__(self, canvas, width, position):
         Equitment.__init__(self, canvas, width, position, WHITE)
+class Linemanager(object):
+    def __init__(self, canvas, width, position):
+        self.can, self.line_width = canvas, width
+        self.x, self.y = position
+        self.object1 = self.can.create_line(0, 0, 0, 0, fill=RED, width=self.line_width)
+
+    def update_line(self, position):
+        self.x, self.y, x, y = position
+        self.can.coords(self.object1, self.x, self.y,
+                        x, y)
+
+    def get_width(self):
+        return self.line_width
+
+    def get_position(self):
+        return self.x, self.y
+
+    def get_object(self):
+        return self.Object
+
+    def get_object1(self):
+        return self.object1
+
+
+class Line(object):
+    def __init__(self, canvas, background):
+        self.can = canvas
+        self.background = background
+        self.screen = self.background.get_screen()
+
         
 # class Paddle(Equitment):
 #     """
@@ -193,7 +223,7 @@ class Puck(object):
         self.vx, self.vy = 4*c, 6*d
         self.a = 1 #friction
         self.cushion = self.w*0.25
-        
+        self.line = Linemanager(canvas, self.w * 2, (0, 0))
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
         
     def update(self, puckx=None, pucky=None):
@@ -241,15 +271,9 @@ class Puck(object):
         
         deltaX = xcoordsock - last_coordx + 0.0001
         deltaY = ycoordsock - last_coordy + 0.0001
-        if deltaX > 3 and deltaY > 3:
-
-        # # #predictive line
-            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
-        
-        if deltaX > 3 and deltaY < -3:
-            self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
-
-
+        if deltaX > 0 and deltaY > 1 or deltaX > 0 and deltaY < -1:
+            #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
+            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
  
     
     def __eq__(self, other):
@@ -274,6 +298,7 @@ class Home(object):
         #goal width = 1/3 of screen width
         background = Background(self.can, screen, screen[0]*0.33)
         self.puck = Puck(self.can, background)
+        self.line = Line(self.can, background)
        
         
         master.bind("<Return>", self.reset)
