@@ -38,9 +38,9 @@ def rand():
         
 class Equitment_puck(object):
     def __init__(self, canvas, width, position, color):
-        self.can, self.w = canvas, width
+        self.can, self.line_width = canvas, width
         self.x, self.y = position
-        self.Object1 = self.can.create_line(0, 0, 0, 0, fill=color,)
+        self.Object1 = self.can.create_line(0, 0, 0, 0, fill=color, width=self.line_width)
         
     
     def update_line(self, position):
@@ -48,7 +48,7 @@ class Equitment_puck(object):
         self.can.coords(self.Object1, self.x, self.y,
                                      x, y)
     def get_width(self):
-        return self.w
+        return self.line_width
     def get_position(self):
         return self.x, self.y
     def get_object(self):
@@ -209,7 +209,7 @@ class Puck(object):
         self.cushion = self.w*0.25
         self.array_length = 0
         self.slope = 1
-        self.line = Linemanager(canvas, 0, (0, 0))
+        self.line = Linemanager(canvas, 30, (0, 0))
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
     mycoordlist = []
 
