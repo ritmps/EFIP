@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM nvcr.io/nvidia/l4t-base:r34.1.1
+FROM nvcr.io/nvidia/l4t-ml:r32.7.1-py3
 
 WORKDIR /EFIP
 
@@ -9,6 +9,8 @@ python3-pip
 
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
+
+RUN git config --global --add safe.directory /workspaces/EFIP
 
 COPY . .
 

@@ -4,5 +4,14 @@
         "CUDA",
         "Jetson",
         "sdkmanager"
-    ]
+    ],
+    "explorer.excludeGitIgnore": false,
+    "files.watcherExclude": {
+        "**/_Attic/**": true,
+        "**/Documentation/**": true,
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/.hg/store/**": true
+    }
 }
