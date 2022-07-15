@@ -24,7 +24,7 @@
 	"-v", "/tmp/.X11-unix/:/tmp/.X11-unix/",
 	"-v", "/tmp/argus_socket:/tmp/argus_socket",
 	"--cap-add=SYS_PTRACE",
-	"-e", "DISPLAY=0",
+	"-e", "DISPLAY=:0",
 	"-it"],
 
 	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker.
