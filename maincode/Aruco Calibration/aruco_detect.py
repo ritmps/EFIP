@@ -5,8 +5,9 @@ import cv2
 from cv2 import aruco
 import numpy as np
 import sys
+import multiprocessing as mp
 
-global HOST, PORT, lutPath, directory, tag_type
+global HOST, PORT, lutPath, directory, arucoDict
 
 verbose = True
 timings = True
@@ -38,10 +39,10 @@ ARUCO_DICT = {
 class timer:
     global verbose, timings
     
-    def __init__(self, starttime):
+    def __init__(self):
         self.avg = 0
         self.count = 0
-        self.start = starttime
+        self.start = 0
         self.curDuration = 0
     
     def start_timer(self, action: str = None):
@@ -68,14 +69,12 @@ class timer:
     def get_curDuration(self):
         return self.curDuration
 
-random_timer = timer(0)
-
 lutTime = timer()
 avgUndistTime = timer()
 avgDetectTime = timer()
 
 def args_parse():
-    global HOST, PORT, lutPath, directory, tag_type
+    global HOST, PORT, lutPath, directory, arucoDict
     parser = argparse.ArgumentParser(description='Run GStreamer RTP stream')
     parser.add_argument('-i', '--host', type=str, default="0.0.0.0", help="Host's port\n    (Default: 0.0.0.0)")
     parser.add_argument('-p', '--port', type=int, default=5004, help="Host's port\n    (Default: 5004)")
@@ -83,17 +82,20 @@ def args_parse():
     parser.add_argument('-d', '--directory', type=str, default="Tags", help="Directory to ArUCo tags\n    (Default: Tags)")
     parser.add_argument('-t', '--type', type=str, default="DICT_5X5_100", help="Type of ArUCo tag to detect\n    (Default: DICT_5X5_100)")
     args = parser.parse_args()
+    if ARUCO_DICT[args.type] == None:
+        print(f'[INFO] ARUCO TAG TYPE: {args.type} IS NOT SUPPORTED')
+        sys.exit(0)
     HOST = args.host
     PORT = args.port
     lutPath = args.lookup
     directory = args.directory
-    tag_type = ARUCO_DICT[args.type]
+    arucoDict = cv2.aruco.Dictionary_get(ARUCO_DICT[args.type])
     if verbose:
         print(f'[INFO] Host: {HOST}\n' \
               f'[INFO] Port: {PORT}\n' \
               f'[INFO] Lookup table: {lutPath}\n' \
               f'[INFO] Directory: {directory}\n' \
-              f'[INFO] Tag type: {args.type} -> {tag_type}')
+              f'[INFO] Tag type: {arucoDict}')
     print(f'Host: {HOST}\nPort: {PORT}')
 
 def gstreamer_in(width=1920, height=1080, fps=60):
@@ -167,9 +169,32 @@ def detect_aruco_markup(image):
     
     # detect aruco tags
     parameters = cv2.aruco.DetectorParameters_create()
-    corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(image, tag_type, parameters=parameters)
+    corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(image, arucoDict, parameters=parameters)
     # draw aruco tags
-    image = cv2.aruco.drawDetectedMarkers(image, corners, ids)
+    if len(corners) > 0:
+        ids = ids.flatten()
+        for (markerCorner, markerID) in zip(corners, ids):
+            # Extract the marker corners (returned in order: top left, top right, bottom right, bottom left)
+            corners = markerCorner.reshape((4, 2))
+            (topLeft, topRight, bottomRight, bottomLeft) = corners
+
+            topRight = (int(topRight[0]), int(topRight[1]))
+            bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
+            bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
+            topLeft = (int(topLeft[0]), int(topLeft[1]))
+
+            # Draw bounding box of ArUCo detection and the center coordinates
+            cv2.line(image, topLeft, topRight, (0, 255, 0), 2)
+            cv2.line(image, topRight, bottomRight, (0, 255, 0), 2)
+            cv2.line(image, bottomRight, bottomLeft, (0, 255, 0), 2)
+            cv2.line(image, bottomLeft, topLeft, (0, 255, 0), 2)
+
+            cX = int((topLeft[0] + bottomRight[0]) / 2.0)
+            cY = int((topLeft[1] + bottomRight[1]) / 2.0)
+            cv2.circle(image, (cX, cY), 4, (0, 0, 255), -1)
+
+            # Draw the ID of the marker
+            cv2.putText(image, str(markerID), (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     avgDetectTime.update('detecting aruco tags')
     return image, corners, ids, rejectedImgPoints
@@ -227,10 +252,10 @@ def read_cam():
                 # Detect aruco tags
                 arucoimg, corners, ids, rejectedImgPoints = detect_aruco_markup(undist_img)
                     
-                if verbose:
-                    print(f'[INFO] Corners: {corners}\n' \
-                          f'[INFO] IDs: {ids}\n' \
-                          f'[INFO] Rejected image points: {rejectedImgPoints}')
+                # if verbose:
+                #     print(f'[INFO] CORNERS: {corners}\n' \
+                #           f'[INFO] IDs: {ids}\n' \
+                #           f'[INFO] REJECTED IMAGE POINTS: {rejectedImgPoints}')
 
                 out.write(arucoimg)
                 cv2.waitKey(1)
