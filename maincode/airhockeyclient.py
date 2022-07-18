@@ -102,7 +102,7 @@ class Linemanager(object):
     def __init__(self, canvas, width, position):
         self.can, self.line_width = canvas, width
         self.x, self.y = position
-        self.object1 = self.can.create_line(0, 0, 0, 0, fill=RED, width=self.line_width)
+        self.object1 = self.can.create_line(0, 0, 0, 0, fill=WHITE, width=self.line_width)
 
     def update_line(self, position):
         self.x, self.y, x, y = position
@@ -271,7 +271,7 @@ class Puck(object):
         
         deltaX = xcoordsock - last_coordx + 0.0001
         deltaY = ycoordsock - last_coordy + 0.0001
-        if deltaX > 0 and deltaY > 1 or deltaX > 0 and deltaY < -1:
+        if deltaX > .5 and deltaY > 1.5 or deltaX > .5 and deltaY < -1.5:
             #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
             self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
  
@@ -320,11 +320,11 @@ class Home(object):
     def update(self):
         self.puck.update()
         
-        if not self.puck.in_goal():
-            self.frame.after(SPEED, self.update) 
-        else:
-            winner = HOME if self.puck.in_goal() == AWAY else AWAY
-            self.update_score(winner)
+        # if not self.puck.in_goal():
+        self.frame.after(SPEED, self.update) 
+        # else:
+        #     winner = HOME if self.puck.in_goal() == AWAY else AWAY
+        #     self.update_score(winner)
             
     def update_score(self, winner):
         self.score[winner] += 1
