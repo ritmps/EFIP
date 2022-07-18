@@ -1,4 +1,4 @@
-from tkinter.tix import DirList
+from nbformat import write
 import numpy as np
 import cv2
 import pandas as pd
@@ -6,6 +6,7 @@ import argparse
 import os
 import tqdm
 import glob
+import csv
 
 verbose = True
 
@@ -171,15 +172,49 @@ def generate_lut():
     distort = np.array([-0.337537993348494, 0.111347442559380, 0.0, 0.0, 0.0])
     imgWidth = 1920
     imgHeight = 1080
-    mapx, mapy = cv2.initUndistortRectifyMap(intrinsic, distort, None, intrinsic, (imgWidth, imgHeight), cv2.CV_32FC1)
 
+    progTotal = (imgWidth * imgHeight) * 3
+
+    progBar = tqdm.tqdm(total=progTotal, ncols=176, desc='Generating remap_lut.csv')
+
+    lutx = np.zeros((imgHeight, imgWidth))
+    luty = np.zeros((imgHeight, imgWidth))
+
+    # let i be the x coordinate of the image, j be the y coordinate
+    for j in range(imgHeight):
+        for i in range(imgWidth):
+            undistPoints = cv2.undistortPoints((i, j), intrinsic, distort, None, None)
+            unNormalizedUndistX = ((undistPoints[0][0][0]  * 1199.17733051303) + 985.626449326511)
+            lutx[j, i] = unNormalizedUndistX
+            unNormalizedUndistY = ((undistPoints[0][0][1] * 1199.46005470673) + 508.709722436638)
+            luty[j, i] = unNormalizedUndistY
+            progBar.update(2)
+        progBar.update(2)
+    
     # Save the look-up tables to a csv file
-    out_arr = np.concatenate((mapx, mapy), axis=0)
+    out_arr = np.concatenate((lutx, luty), axis=0)
     if verbose:
         print(f'[INFO] Shape of output array: {out_arr.shape}')
     out_df = pd.DataFrame(out_arr)
     print(f'[INFO] Saving lookup table to remap_lut.csv...')
     out_df.to_csv('remap_lut.csv', index=False, header=False)
+
+    progBar.update(imgWidth * imgHeight)
+    progBar.close()
+
+    # # Save the look-up tables to a csv file
+    # out_arr = np.concatenate((mapx, mapy), axis=0)
+    # if verbose:
+    #     print(f'[INFO] Shape of mapx output array: {mapx.shape}')
+    # mapx_out_df = pd.DataFrame(mapx)
+    # print(f'[INFO] Saving lookup table to remap_mapx_lut.csv...')
+    # mapx_out_df.to_csv('remap_mapx_lut.csv', index=False, header=False)
+
+    # if verbose:
+    #     print(f'[INFO] Shape of mapy output array: {mapy.shape}')
+    # mapy_out_df = pd.DataFrame(mapy)
+    # print(f'[INFO] Saving lookup table to remap_mapy_lut.csv...')
+    # mapy_out_df.to_csv('remap_mapy_lut.csv', index=False, header=False)
 
 if __name__ == '__main__':
     parse_args()
