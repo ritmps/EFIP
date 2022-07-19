@@ -274,6 +274,8 @@ class Puck(object):
         if deltaX > .5 and deltaY > 1.5 or deltaX > .5 and deltaY < -1.5:
             #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
             self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
+        else:
+            self.line.update_line((0, 0, 0, 0))
  
     
     def __eq__(self, other):
