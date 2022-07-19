@@ -8,7 +8,7 @@ import numpy as np
 import imutils
 from collections import deque
 
-verbose = False
+verbose = True
 
 # Define the input stream for gstreamer
 def gstreamer_in(width=1920, height=1080, fps=60):
@@ -193,7 +193,7 @@ def read_cam():
           f'\n--------------------------------------------------\n')
 
     # Create a look up table for distortion correction
-    lutmapx, lutmapy = getDistortLUT()
+    lutmapx, lutmapy = genDistortLUT(h, w)
 
     # Write OpenCV frames to Gstreamer stream (pipeout)
     gst_out = gstreamer_out(host=inputhost, port=inputport)
@@ -215,12 +215,12 @@ def read_cam():
                 if not ret_val:
                     break
                 
-                # if verbose:
-                #     undist_time_init = time.time()
-                # # Undistort the image
-                # undist_img = undistort_img(img, lutmapx, lutmapy)
-                # if verbose:
-                #     print(f'[INFO] Undistort time: {(time.time() - undist_time_init) * 1000} ms')
+                if verbose:
+                    undist_time_init = time.time()
+                # Undistort the image
+                undist_img = undistort_img(img, lutmapx, lutmapy)
+                if verbose:
+                    print(f'[INFO] Undistort time: {(time.time() - undist_time_init) * 1000} ms')
 
                 # if verbose:
                 #     track_time_init = time.time()
@@ -236,7 +236,7 @@ def read_cam():
                 # if verbose:
                 #     print(f'[INFO] Edge time: {(time.time() - edge_time_init) * 1000} ms')
 
-                out.write(img)
+                out.write(undist_img)
                 cv2.waitKey(1)
             except KeyboardInterrupt:
                 break

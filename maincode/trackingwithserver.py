@@ -32,10 +32,10 @@ global newthread, ballThread
 # construct the argument parse and parse the arguments
 isQuitting = False
 
-verbose = True
+verbose = False
 
 # WARNING: This will enable debug messages inside the CAMERA loop making console very spammy.
-frame_verbose = True
+frame_verbose = False
 
 # WARNING: This will enable debug messages inside the SOCKET loop making console very spammy.
 socket_verbose = False
