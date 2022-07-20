@@ -4,3 +4,5 @@ capture_*.png
 remap_lut.csv
 remap_mapx_lut.csv
 remap_mapy_lut.csv
+maincode/lookup_table.csv
+maincode/remap.csv
