@@ -45,6 +45,7 @@ print("[INFO] generating ArUCo tag type '{}' with ID '{}'".format(
 	args["type"], args["id"]))
 tag = np.zeros((300, 300, 1), dtype="uint8")
 cv2.aruco.drawMarker(arucoDict, args["id"], 300, tag, 1)
+
 # write the generated ArUCo tag to disk and then display it to our screen
-cv2.imwrite(args["output"], tag)
+cv2.imwrite(f'{args["output"]}{args["type"]}_id{args["id"]}.png', tag)
 cv2.waitKey(0)
