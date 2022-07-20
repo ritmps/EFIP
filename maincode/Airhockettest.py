@@ -275,6 +275,8 @@ class Puck(object):
         if deltaX > 0 and deltaY > 0 or deltaX > 0 and deltaY < 0:
             #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
             self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
+        else:
+            self.line.update_line((0,0,0,0))
         # # #predictive line
         #    self.can.create_line(last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
         #    self.can.coords(Line(self, 5, x, y),last_coordx, last_coordy, self.x + slope * 500, self.y + slope * 500, fill=BLUE, width = 5 )
@@ -369,6 +371,6 @@ def play(screen):
 if __name__ == "__main__":
     """ Choose screen size """
     screen = 960, 540
-    # screen = 1920, 1080
+    #screen = 1920, 1080
 
     play(screen)

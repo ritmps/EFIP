@@ -36,7 +36,7 @@ def recvcoord():
                 ycoordsock = data[2]
                 mycoordlist.append([xcoordsock, ycoordsock])
 
-                print(f"Received {xcoordsock}, {ycoordsock}")
+                #print(f"Received {xcoordsock}, {ycoordsock}")
 
                 #print(f"Received {data!r}")
                 
@@ -271,10 +271,10 @@ class Puck(object):
         
         deltaX = xcoordsock - last_coordx + 0.0001
         deltaY = ycoordsock - last_coordy + 0.0001
-        if deltaX > .5 and deltaY > 1.5 or deltaX > .5 and deltaY < -1.5:
+        if deltaX > .5 and deltaY > 1 or deltaX > .5 and deltaY < -1:
             #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
             self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
-        else:
+        elif deltaX < -.5 and deltaY > 1 or deltaX < -.5 and deltaY < -1:
             self.line.update_line((0, 0, 0, 0))
  
     
