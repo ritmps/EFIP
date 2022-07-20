@@ -271,10 +271,10 @@ class Puck(object):
         
         deltaX = xcoordsock - last_coordx + 0.0001
         deltaY = ycoordsock - last_coordy + 0.0001
-        if deltaX > .5 and deltaY > 1 or deltaX > .5 and deltaY < -1:
+        if deltaX > .5 and deltaY > 1.5 or deltaX > .5 and deltaY < -1.5:
             #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
             self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
-        elif deltaX < -.5 and deltaY > 1 or deltaX < -.5 and deltaY < -1:
+        elif deltaX < -.5 and deltaY > 1.5 or deltaX < -.5 and deltaY < -1.5:
             self.line.update_line((0, 0, 0, 0))
  
     
