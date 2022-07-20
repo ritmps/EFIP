@@ -1,7 +1,7 @@
 # EFIP
-Tracking code for the extended freshman imaging project.
+## **For information about our project and more in depth info on each file in this repository, visit our repo's wiki!**
 
-For information about our project and more in depth info on each file in this repository, visit our repo's wiki!
+Tracking code for the extended freshman imaging project.
 
 ---
 
