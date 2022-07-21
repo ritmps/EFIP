@@ -6,6 +6,7 @@ from cv2 import aruco
 import numpy as np
 import sys
 import multiprocessing as mp
+import curses
 
 global HOST, PORT, lutPath, directory, arucoDict
 
@@ -97,7 +98,7 @@ def args_parse():
     parser.add_argument('-l', '--lookup', type=str, default="../lookup_table.csv", help="Path to lookup table\n    (Default: /workspaces/EFIP/maincode/lookup_table.csv)")
     parser.add_argument('-r', '--remap', type=str, default="../remap.csv", help="Path to remap table\n    (Default: /workspaces/EFIP/maincode/remap.csv)")
     parser.add_argument('-d', '--directory', type=str, default="Tags", help="Directory to ArUCo tags\n    (Default: Tags)")
-    parser.add_argument('-t', '--type', type=str, default="DICT_5X5_100", help="Type of ArUCo tag to detect\n    (Default: DICT_5X5_100)")
+    parser.add_argument('-t', '--type', type=str, default="DICT_4X4_50", help="Type of ArUCo tag to detect\n    (Default: DICT_5X5_100)")
     args = parser.parse_args()
     if ARUCO_DICT[args.type] == None:
         print(f'[INFO] ARUCO TAG TYPE: {args.type} IS NOT SUPPORTED')
