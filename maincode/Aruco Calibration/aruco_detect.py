@@ -6,7 +6,6 @@ from cv2 import aruco
 import numpy as np
 import sys
 import multiprocessing as mp
-import curses
 
 global HOST, PORT, lutPath, directory, arucoDict
 
