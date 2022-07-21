@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="71d1f5fd-37d2-48f0-a461-ee8f9ed2bc01" name="Changes" comment="Displays ArUCo marker on 2nd screen when run" />
+    <list default="true" id="71d1f5fd-37d2-48f0-a461-ee8f9ed2bc01" name="Changes" comment="Displays ArUCo marker on 2nd screen when run">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -192,7 +194,9 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/EFIP$AirHockey.coverage" NAME="AirHockey Coverage Results" MODIFIED="1657549011615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/maincode" />
-    <SUITE FILE_PATH="coverage/EFIP$client_program.coverage" NAME="client_program Coverage Results" MODIFIED="1657896318797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/maincode/Aruco Calibration" />
-    <SUITE FILE_PATH="coverage/EFIP$airhockeyclient.coverage" NAME="airhockeyclient Coverage Results" MODIFIED="1657650245856" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/maincode" />
+    <SUITE FILE_PATH="coverage/EFIP$client_program.coverage" NAME="client_program Coverage Results" MODIFIED="1657908373366" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/maincode/Aruco Calibration" />
+    <SUITE FILE_PATH="coverage/EFIP$Airhockettest.coverage" NAME="Airhockettest Coverage Results" MODIFIED="1657904517402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/maincode" />
+    <SUITE FILE_PATH="coverage/EFIP$aruco_detect.coverage" NAME="aruco_detect Coverage Results" MODIFIED="1657908347555" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/maincode/Aruco Calibration" />
+    <SUITE FILE_PATH="coverage/EFIP$airhockeyclient.coverage" NAME="airhockeyclient Coverage Results" MODIFIED="1658236692806" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/maincode" />
   </component>
 </project>
