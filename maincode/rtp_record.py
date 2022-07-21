@@ -4,6 +4,7 @@ import argparse
 import threading
 import time
 import os
+import numpy as np
 
 # Define the input stream for gstreamer
 def gstreamer_in(width=1920, height=1080, fps=60):
@@ -46,15 +47,24 @@ def parse_args():
 
     print(f'Host: {inputhost}\nPort: {inputport}')
 
+def load_remap_table():
+    remap_lut = np.loadtxt('remap.csv', delimiter=',', dtype=np.float32)
+    mapx, mapy = np.vsplit(remap_lut, 2)
+    return (mapx, mapy)
+
 def capture_img():
     global img, stop_thread, directory
+
+    mapx, mapy = load_remap_table()
 
     img_num = 0
 
     time.sleep(5.0)
 
     while True:
-        cv2.imwrite(os.path.join(directory, f'capture_{img_num}.png'), img)
+        img_undist = cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR)
+
+        cv2.imwrite(os.path.join(directory, f'capture_{img_num}.png'), img_undist)
         time.sleep(1)
         img_num += 1
         if stop_thread:
