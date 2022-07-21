@@ -296,7 +296,7 @@ class ClientThread(threading.Thread):
 
 
 parse_args()
-load_calibraton_map('./remap_lut.csv')
+load_calibraton_map('./lookup_table.csv')
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
