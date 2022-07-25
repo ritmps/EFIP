@@ -17,15 +17,6 @@ import keyboard
 # tracks objects given their hsv color values. 
 
 # import the necessary packages
-from collections import deque
-
-from cv2 import VideoCapture
-from imutils.video import VideoStream
-import numpy as np
-import argparse
-import cv2
-import imutils
-import time
 
 global newthread, ballThread
 
