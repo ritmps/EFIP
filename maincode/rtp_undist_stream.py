@@ -172,6 +172,11 @@ def edge_detect(image):
     
     return edges
 
+def background_subtract(image):
+    background_sub = cv2.createBackgroundSubtractorMOG2()
+    removed_bg = background_sub.apply(image)
+    return removed_bg
+
 def read_cam():
     global img, stop_thread
 
@@ -222,6 +227,13 @@ def read_cam():
                 if verbose:
                     print(f'[INFO] Undistort time: {(time.time() - undist_time_init) * 1000} ms')
 
+                # Background subtraction
+                if verbose:
+                    bg_sub_time_init = time.time()
+                bg_sub_img = background_subtract(undist_img)
+                if verbose:
+                    print(f'[INFO] Background subtraction time: {(time.time() - bg_sub_time_init) * 1000} ms')
+
                 # if verbose:
                 #     track_time_init = time.time()
                 # # Image with the track
@@ -236,7 +248,7 @@ def read_cam():
                 # if verbose:
                 #     print(f'[INFO] Edge time: {(time.time() - edge_time_init) * 1000} ms')
 
-                out.write(undist_img)
+                out.write(bg_sub_img)
                 cv2.waitKey(1)
             except KeyboardInterrupt:
                 break

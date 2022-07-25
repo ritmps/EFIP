@@ -40,37 +40,43 @@ ARUCO_DICT = {
 class timer:
     global verbose, timings
     
-    # Initialize the timer setting the average time, number of times it was called, the start time,
-    # and the current duration of the timer all to 0.
     def __init__(self):
         self.avg = 0
-        self.count = 0
-        self.start = 0
+        self.lap_count = 0
+        self.start_time = 0
         self.curDuration = 0
     
-    # Set the start time of the timer, ie. start the timer.
-    def start_timer(self, action: str = None):
-        self.start = time.time()
+    # Start the timer
+    def start(self, action: str = None):
+        self.start_time = time.time()
         if action is ((not None) and (verbose)):
-                print(f'[INFO] {action.upper()} STARTED')
+            print(f'[INFO] {action.upper()} STARTED')
 
-    # If verbose is active, print the duration of the timer.
-    # If timings is active, update the average time of the timer.
-    def update(self, action: str):
-        if verbose or timings:
-            self.curDuration = (time.time() - self.start) * 1000
-            if verbose:
+    # Lap
+    def lap(self, action: str = None, round: int = -1):
+        sync_time = time.time()
+        self.lap_count =+ 1
+        self.curDuration = (sync_time - self.start_time) * 1000
+        self.avg = self.avg + ((self.curDuration - self.avg) / self.lap_count)
+        self.start_time = sync_time
+        if action is ((not None) and (verbose)):
+            if round == -1:
                 print(f'[INFO] {action.upper()} TOOK {self.curDuration}ms')
-            if timings:
-                self.update_average()
+            else:
+                print(f'[INFO] {action.upper()} TOOK {round(self.curDuration, round)}ms')
 
-    # Update the average time of the timer with a moving average 
-    # ("new average" = ("current calculated time of the timer" - "old average") / "number of times the timer was called")
-    def update_average(self):
-        self.count += 1
-        self.avg = self.avg + ((self.curDuration - self.avg) / self.count)
-        self.start_timer()
+    # Stop the timer
+    def stop(self, action: str = None, round: int = -1):
+        self.lap()
+        if action is ((not None) and (verbose)):
+            if round == -1:
+                print(f'[INFO] {action.upper()} TOOK {self.curDuration}ms')
+            else:
+                print(f'[INFO] {action.upper()} TOOK {round(self.curDuration, round)}ms')
 
+    def get_lap_count(self):
+        return self.lap_count
+    
     # Return the average time of the timer.
     def get_average(self):
         return self.avg
@@ -116,37 +122,44 @@ def args_parse():
               f'[INFO] Tag type: {arucoDict}')
     print(f'Host: {HOST}\nPort: {PORT}')
 
-# Define the gstreamer input pipeline
-def gstreamer_in(width=1920, height=1080, fps=60):
-    pipeinParams = \
-        f"nvarguscamerasrc ! " \
-        f"video/x-raw(memory:NVMM), width={width}, height={height}, format=(string)NV12, framerate={fps}/1 ! " \
-        f"nvvidconv flip-method=0 ! "\
-        f"video/x-raw, width=1920, height=1080, format=(string)BGRx ! " \
-        f"videoconvert ! " \
-        f"video/x-raw, format=(string)BGR ! " \
-        f"appsink"
-    return (pipeinParams)
+# @TODO add with statement implementation
 
-# Define the gstreamer output pipeline
-def gstreamer_out(host, port):
-    pipeoutParams = \
-        f"appsrc ! " \
-        f"video/x-raw, format=BGR ! " \
-        f"queue ! " \
-        f"videoconvert ! " \
-        f"video/x-raw,format=BGRx ! " \
-        f"nvvidconv ! " \
-        f"nvv4l2h264enc ! " \
-        f"h264parse ! " \
-        f"rtph264pay pt=96 config-interval=1 ! " \
-        f"udpsink host={host} port={port}"
-    return (pipeoutParams)
+class CameraPipeline(object):
+    def __init__(self):
+        self.inPipeline = self.gstreamer_in()
+        self.outPipeline = self.gstreamer_out()
+
+    # Define the gstreamer input pipeline
+    def gstreamer_in(width=1920, height=1080, fps=60):
+        pipeinParams = \
+            f"nvarguscamerasrc ! " \
+            f"video/x-raw(memory:NVMM), width={width}, height={height}, format=(string)NV12, framerate={fps}/1 ! " \
+            f"nvvidconv flip-method=0 ! "\
+            f"video/x-raw, width=1920, height=1080, format=(string)BGRx ! " \
+            f"videoconvert ! " \
+            f"video/x-raw, format=(string)BGR ! " \
+            f"appsink"
+        return (pipeinParams)
+
+    # Define the gstreamer output pipeline
+    def gstreamer_out(host, port):
+        pipeoutParams = \
+            f"appsrc ! " \
+            f"video/x-raw, format=BGR ! " \
+            f"queue ! " \
+            f"videoconvert ! " \
+            f"video/x-raw,format=BGRx ! " \
+            f"nvvidconv ! " \
+            f"nvv4l2h264enc ! " \
+            f"h264parse ! " \
+            f"rtph264pay pt=96 config-interval=1 ! " \
+            f"udpsink host={host} port={port}"
+        return (pipeoutParams)
 
 # Load the Lookup Table from the csv file labeled lookup_table.csv
 def getDistortLUT():
     global lutTime
-    lutTime.start_timer()
+    lutTime.start()
     
     print(f"[INFO] LOADING CALIBRATION LOOKUP TABLE: {lutPath}\n" \
         f"[INFO] PLEASE BE PATIENT, THIS CAN TAKE A MOMENT...")
@@ -157,13 +170,13 @@ def getDistortLUT():
     # Split the array into mapx and mapy
     mapx, mapy = np.vsplit(remap_lut, 2)
 
-    lutTime.update('loading calibration lookup table')
+    lutTime.stop('loading calibration lookup table', 2)
     return (mapx, mapy)
 
 # Load the remap Table from the csv file labeled remap.csv
 def getRemapLUT():
     global remapTime
-    remapTime.start_timer()
+    remapTime.start()
     
     print(f"[INFO] LOADING REMAP TABLE: {remapPath}\n" \
         f"[INFO] PLEASE BE PATIENT, THIS CAN TAKE A MOMENT...")
@@ -174,45 +187,30 @@ def getRemapLUT():
     # Split the array into mapx and mapy
     mapx, mapy = np.vsplit(remap_lut, 2)
 
-    remapTime.update('loading remap table')
+    remapTime.stop('loading remap table', 2)
     return (mapx, mapy)
 
 # Function to undistort the image using the look up table
 def undistort_img(image, lutmapx, lutmapy):
     global avgUndistTime
-    avgUndistTime.start_timer('undistorting image')
+    avgUndistTime.start()
     
     # Undistort the image using the look up table
     undist = cv2.remap(image, lutmapx, lutmapy, cv2.INTER_LINEAR)
 
-    avgUndistTime.update('undistorting image')
+    avgUndistTime.lap('undistorting image')
     return undist
 
 # Function to detect the aruco marker corners, ids, and rejected image points without marking up the image
 def detect_aruco(image):
     global avgDetectTime
-    avgDetectTime.start_timer('detecting aruco tags')
+    avgDetectTime.start()
 	
     # detect aruco tags
     parameters = cv2.aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(image, cv2.aruco.DICT_5X5_100, parameters=parameters)
-
-    if len(corners) > 0:
-        ids = ids.flatten()
-        for (markerCorner, markerID) in zip(corners, ids):
-            # Extract the marker corners (returned in order: top left, top right, bottom right, bottom left)
-            corners = markerCorner.reshape((4, 2))
-            (topLeft, topRight, bottomRight, bottomLeft) = corners
-
-            topRight = (int(topRight[0]), int(topRight[1]))
-            bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
-            bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
-            topLeft = (int(topLeft[0]), int(topLeft[1]))
-
-            cX = int((topLeft[0] + bottomRight[0]) / 2.0)
-            cY = int((topLeft[1] + bottomRight[1]) / 2.0)
     
-    avgDetectTime.update('detecting aruco tags')
+    avgDetectTime.lap('detecting aruco tags')
     return corners, ids, rejectedImgPoints
 
 # Returns corners, ids, rejected image points, and marks up an image using the detected points
