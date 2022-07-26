@@ -1,5 +1,7 @@
 RTSP/test-launch
 *.pyc
 capture_*.png
-remap_lut.csv
+lookup_table.csv
+remap.csv
 maincode/Aruco Calibration/Tags
+.venv/
