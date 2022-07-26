@@ -10,7 +10,7 @@ if sys.version_info.major > 2:
 else:
     import Tkinter as tk
 
-RED, BLACK, WHITE, DARK_RED, BLUE = "red", "black", "white", "dark red", "blue"
+RED, BLACK, WHITE, DARK_RED, BLUE, LIGHT_GREEN = "red", "black", "white", "dark red", "blue", "light green"
 ZERO = 5  # for edges.
 LOWER, UPPER = "lower", "upper"
 HOME, AWAY = "Top", "Bottom"
@@ -89,14 +89,14 @@ class PuckManager(Equitment):
     """
 
     def __init__(self, canvas, width, position):
-        Equitment.__init__(self, canvas, width, position, WHITE)
+        Equitment.__init__(self, canvas, width, position, LIGHT_GREEN)
 
 
 class Linemanager(object):
     def __init__(self, canvas, width, position):
         self.can, self.line_width = canvas, width
         self.x, self.y = position
-        self.object1 = self.can.create_line(0, 0, 0, 0, fill=RED, width=self.line_width)
+        self.object1 = self.can.create_line(0, 0, 0, 0, fill=WHITE, width=self.line_width)
 
     def update_line(self, position):
         self.x, self.y, x, y = position
@@ -109,8 +109,6 @@ class Linemanager(object):
     def get_position(self):
         return self.x, self.y
 
-    def get_object(self):
-        return self.Object
 
     def get_object1(self):
         return self.object1
@@ -145,7 +143,7 @@ class Background(object):
         self.can.create_oval(self.w / 2 - d, self.h / 2 - d, self.w / 2 + d, self.h / 2 + d,
                              fill=BLACK, outline=BLUE)
         self.can.create_line(self.w / 2, ZERO, self.w / 2, self.h, fill=BLUE)  # middle
-        self.can.create_line(ZERO, ZERO, self.w, ZERO, fill=BLUE)  # left
+        self.can.create_line(ZERO, ZERO, self.w, ZERO, fill=RED)  # left
         self.can.create_line(ZERO, self.h, self.w, self.h, fill=BLUE)  # right
         # top
         self.can.create_line(ZERO, ZERO, ZERO, self.h / 2 - self.goal_h / 2,
@@ -223,13 +221,15 @@ class Puck(object):
         c, d = rand()  # generate psuedorandom directions.
         self.vx, self.vy = 4 * c, 6 * d
         self.a = 1  # friction
-        self.cushion = self.w * 0.25
+        #self.cushion = self.w * 0.25
         self.array_length = 0
         self.slope = 1
         self.line = Linemanager(canvas, self.w * 2, (0, 0))
+        self.line2 =Linemanager(canvas, self.w * 2, (0, 0))
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
 
     mycoordlist = []
+
 
     def update(self):
         global mycoordlist
@@ -240,9 +240,6 @@ class Puck(object):
         if self.vy > 0.25: self.vy *= self.a
 
         x, y = self.x + self.vx, self.y + self.vy
-        # preiction tests
-        # stepX = -1
-        # stepY = -(deltaY/deltaX)
 
         if not self.background.is_position_valid((x, y), self.w):
             if x - self.w < ZERO or x + self.w > self.screen[0]:
@@ -271,11 +268,41 @@ class Puck(object):
         # w = Canvas(root, width=200, height=200)
         # w.pack()
         # var = w.create_line(0, 0, 100, 100)
+        def line(p1, p2):
+            A = (p1[1] - p2[1])
+            B = (p2[0] - p1[0])
+            C = (p1[0]*p2[1] - p2[0]*p1[1])
+            return A, B, -C
+
+        def intersection(L1, L2):
+            D  = L1[0] * L2[1] - L1[1] * L2[0]
+            Dx = L1[2] * L2[1] - L1[1] * L2[2]
+            Dy = L1[0] * L2[2] - L1[2] * L2[0]
+            if D != 0:
+                x = Dx / D
+                y = Dy / D
+                return x,y
+            else:
+                return False
+
 
         if deltaX > 0 and deltaY > 0 or deltaX > 0 and deltaY < 0:
             #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
-            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
-            #if self.x + delta * 500 > screen[0] and self.x
+            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 300, self.y + deltaY * 300))
+            L1 = line([0,0], [self.screen[0]-self.w,0])
+            L2 = line([last_coordx, last_coordy], [self.x + deltaX * 300, self.y + deltaY * 300])
+
+            R = intersection(L1, L2)
+            if R[0] < 960 and R[1] < 540:
+                print ("Intersection detected:", R)
+                self.line2.update_line((R[0], R[1], (self.x + deltaX * 300), -(self.y + deltaY * 300)))
+            # else:
+            #     print ("No single intersection point detected")
+                
+
+
+
+        
         elif deltaX < -.5 and deltaY > 1.5 or deltaX < -.5 and deltaY < -1.5:
             self.line.update_line((0, 0, 0, 0))
 
@@ -286,7 +313,7 @@ class Puck(object):
 
         # print(mycoordlist)
 
-        print(last_coordx, self.x, last_coordy, self.y)
+        #print(last_coordx, self.x, last_coordy, self.y)
 
         # print(self.x, self.y)
 
