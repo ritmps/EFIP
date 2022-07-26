@@ -4,6 +4,7 @@
 import sys, random
 from tkinter import Canvas
 from turtle import position
+import math
 
 if sys.version_info.major > 2:
     import tkinter as tk
@@ -291,11 +292,14 @@ class Puck(object):
             self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 300, self.y + deltaY * 300))
             L1 = line([0,0], [self.screen[0]-self.w,0])
             L2 = line([last_coordx, last_coordy], [self.x + deltaX * 300, self.y + deltaY * 300])
+            
 
             R = intersection(L1, L2)
+            # figuring out the angle of intersection then the difference between center and edge intersection
+            trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R[0])/(self.y + deltaY * 300 - R[1]))))
             if R[0] < 960 and R[1] < 540:
                 print ("Intersection detected:", R)
-                self.line2.update_line((R[0], R[1], (self.x + deltaX * 300), -(self.y + deltaY * 300)))
+                self.line2.update_line((R[0]+ round(trigsolve), R[1]+(self.w), (self.x + deltaX * 300) + (trigsolve), -(self.y + deltaY * 300+self.w)))
             # else:
             #     print ("No single intersection point detected")
                 
