@@ -93,37 +93,6 @@ class PuckManager(Equitment):
         Equitment.__init__(self, canvas, width, position, LIGHT_GREEN)
 
 
-class Linemanager(object):
-    def __init__(self, canvas, width, position):
-        self.can, self.line_width = canvas, width
-        self.x, self.y = position
-        self.object1 = self.can.create_line(0, 0, 0, 0, fill=WHITE, width=self.line_width)
-
-    def update_line(self, position):
-        self.x, self.y, x, y = position
-        self.can.coords(self.object1, self.x, self.y,
-                        x, y)
-
-    def get_width(self):
-        return self.line_width
-
-    def get_position(self):
-        return self.x, self.y
-
-
-    def get_object1(self):
-        return self.object1
-
-
-class Line(object):
-    def __init__(self, canvas, background):
-        self.can = canvas
-        self.background = background
-        self.screen = self.background.get_screen()
-
-        # self.w = self.background.get_goal_h()/12
-
-
 class Background(object):
     """
     canvas: tk.Canvas object.
@@ -137,42 +106,84 @@ class Background(object):
 
         self.draw_bg()
 
+    # Draw the background of the playing field.
     def draw_bg(self):
         self.can.config(bg=BLACK, width=self.w, height=self.h)
-        # middle circle
+        # Draw the middle circle
         d = self.goal_h / 4
-        self.can.create_oval(self.w / 2 - d, self.h / 2 - d, self.w / 2 + d, self.h / 2 + d,
-                             fill=BLACK, outline=BLUE)
-        self.can.create_line(self.w / 2, ZERO, self.w / 2, self.h, fill=BLUE)  # middle
-        self.can.create_line(ZERO, ZERO, self.w, ZERO, fill=RED)  # left
-        self.can.create_line(ZERO, self.h, self.w, self.h, fill=BLUE)  # right
-        # top
-        self.can.create_line(ZERO, ZERO, ZERO, self.h / 2 - self.goal_h / 2,
-                             fill=BLUE)
-        self.can.create_line(ZERO, self.h / 2 + self.goal_h / 2, ZERO, self.h,
-                             fill=BLUE)
-        # bottom
-        self.can.create_line(self.w, ZERO, self.w, self.h / 2 - self.goal_h / 2,
-                             fill=BLUE)
-        self.can.create_line(self.w, self.h / 2 + self.goal_h / 2, self.w, self.h,
-                             fill=BLUE)
+        self.can.create_oval(
+            self.w / 2 - d,
+            self.h / 2 - d,
+            self.w / 2 + d,
+            self.h / 2 + d,
+            fill=BLACK,
+            outline=BLUE
+        )
+        # Draw the middle line
+        self.can.create_line(
+            self.w / 2,
+            ZERO,
+            self.w / 2,
+            self.h,
+            fill=BLUE
+        )
+        # Draw the line on the left
+        self.can.create_line(
+            ZERO,
+            ZERO,
+            self.w,
+            ZERO,
+            fill=RED
+        )
+        # Draw the line on the right
+        self.can.create_line(
+            ZERO,
+            self.h,
+            self.w,
+            self.h,
+            fill=BLUE
+        )
+        # Draw the lines on the top
+        self.can.create_line(
+            ZERO,
+            ZERO,
+            ZERO,
+            self.h / 2 - self.goal_h / 2,
+            fill=BLUE
+        )
+        self.can.create_line(
+            ZERO,
+            self.h / 2 + self.goal_h / 2,
+            ZERO,
+            self.h,
+            fill=BLUE
+        )
+        # Draw the lines on the bottom
+        self.can.create_line(
+            self.w,
+            ZERO,
+            self.w,
+            self.h / 2 - self.goal_h / 2,
+            fill=BLUE
+        )
+        self.can.create_line(
+            self.w,
+            self.h / 2 + self.goal_h / 2,
+            self.w,
+            self.h,
+            fill=BLUE
+        )
 
+    # Check whether the position is inside the playing field.
     def is_position_valid(self, position, width, constraint=None):
         x, y = position
-        # if puck is in goal, let it keep going in.
-        if constraint == None and self.is_in_goal(position, width):
-            return True
-        # bounces
-        elif (x - width < ZERO or x + width > self.w or
-              y - width < ZERO or y + width > self.h):
+        # If object is outside of the walls, false.
+        if ((x - width) < ZERO) or ((x + width) > self.w) or ((y - width) < ZERO) or ((y + width) > self.h):
             return False
-        # elif constraint == LOWER:
-        # return y - width > self.h/2
-        # elif constraint == UPPER:
-        # return y + width < self.h/2
         else:
             return True
 
+    # Check whether the position is inside the goal.
     def is_in_goal(self, position, width):
         x, y = position
         if (x - width <= ZERO and y - width > self.h / 2 - self.goal_h / 2 and
@@ -207,6 +218,174 @@ class Target(object):
             print("target aquired")
 
 
+class Line(object):
+    def __init__(self, canvas, background, width, length=300, tracebackAmt=2, color=WHITE):
+        self.can = canvas
+        self.background = background
+        self.screenW, self.screenH = self.background.get_screen()
+        self.line_length = length
+        self.tracebackAmt = tracebackAmt
+        self.xinit, self.yinit = 0, 0
+        self.xfinal, self.yfinal = 0, 0
+        self.deltaX, self.deltaY = 0, 0
+        self.slope = 0
+        self.line = self.can.create_line(0, 0, 0, 0, fill=color, width=width)
+        self.coordList = None
+
+    def update_coordList(self, puckX, puckY):
+        # If coordList is not defined, define it as a numpy array with the x and y coordinate of the puck
+        if self.coordList is None:
+            self.coordList = np.array([[puckX, puckY]])
+        # If coordList is defined, append the x and y coordinate of the puck to the end of the array
+        else:
+            if self.coordList.shape[0] < self.tracebackAmt:
+                self.coordList = np.append(self.coordList, [[puckX, puckY]], axis=0)
+            # If coordList is full, remove the first row and append the new x and y coordinate of the puck
+            else:
+                self.coordList = np.delete(self.coordList, 0, 0)
+                self.coordList = np.append(self.coordList, [[puckX, puckY]], axis=0)
+
+        # Get the initial coordinates of the puck in the coordList array
+        puckXInit, puckYInit = self.coordList[0, 0], self.coordList[0, 1]
+
+        # Calculate the slope of the line between the initial coordinates and the current coordinates
+        self.deltaX = puckX - puckXInit
+        self.deltaY = puckY - puckYInit
+        # Avoid division by zero error
+        if self.deltaX == 0:
+            self.slope = None
+        else:
+            self.slope = self.deltaY / self.deltaX
+
+        # Redraw the line
+        self.slope_redraw()
+
+    def slope_redraw(self, xInit=None, yInit=None, deltaX=None, deltaY= None):
+        # If any of the parameters are set, update the line's parameters accordingly
+        if xInit is not None:
+            self.xinit = xInit
+        if yInit is not None:
+            self.yinit = yInit
+        if deltaX is not None:
+            self.deltaX = deltaX
+        if deltaY is not None:
+            self.deltaY = deltaY
+
+        # Calculate the final coordinates of the line
+        self.xfinal = self.xinit + ((self.deltaX / self.tracebackAmt) * self.line_length)
+        self.yfinal = self.yinit + ((self.deltaY / self.tracebackAmt) * self.line_length)
+        self.can.coords(self.line, self.xinit, self.yinit, self.xfinal, self.yfinal)
+
+    def update(self, xInit, yInit, xfinal=None, yfinal=None, slope=None):
+        if (xfinal is not None) or (yfinal is not None):
+            self.xinit, self.yinit, self.xfinal, self.yfinal = xInit, yInit, xfinal, yfinal
+            self.can.coords(self.line, xInit, yInit, xInit, yInit)
+        elif slope is not None:
+            self.slope = slope
+            self.xinit, self.yinit = xInit, yInit
+            self.xfinal, self.yfinal = (xInit + (self.slope * self.line_length)), (yInit + (self.slope * self.line_length))
+            self.can.coords(self.line, xInit, yInit, xfinal, yfinal)
+
+    def hide(self):
+        self.can.coords(self.line, 0, 0, 0, 0)
+
+    def show(self):
+        self.can.coords(self.line, self.xinit, self.yinit, self.xfinal, self.yfinal)
+        # self.w = self.background.get_goal_h()/12
+
+    def get_intersection(self, l2x1, l2y1, l2x2, l2y2):
+        if (self.xfinal - self.xinit == 0) and (not (l2x2 - l2x1 == 0)):
+            self.slope = None
+            l2Slope = (l2y2 - l2y1) / (l2x2 - l2x1)
+            xIntersect = self.xinit
+            yIntersect = (l2Slope * xIntersect) + (l2y1 - (l2x1 * l2Slope))
+            yMax = max(self.yinit, self.yfinal)
+            yMin = min(self.yinit, self.yfinal)
+            if yMin <= yIntersect <= yMax:
+                return xIntersect, yIntersect
+            else:
+                return None
+        elif (not (self.xfinal - self.xinit == 0)) and (l2x2 - l2x1 == 0):
+            self.slope = (self.yfinal - self.yinit) / (self.xfinal - self.xinit)
+            l2Slope = None
+            xIntersect = l2x1
+            yIntersect = (self.slope * xIntersect) + (self.yinit - (self.xinit * self.slope))
+            yMax = max(self.yinit, self.yfinal)
+            yMin = min(self.yinit, self.yfinal)
+            if yMin <= yIntersect <= yMax:
+                return xIntersect, yIntersect
+            else:
+                return None
+        elif (self.xfinal - self.xinit == 0) and (l2x2 - l2x1 == 0):
+            self.slope = None
+            return None
+        else:
+            self.slope = (self.yfinal - self.yinit) / (self.xfinal - self.xinit)
+            l2Slope = (l2y2 - l2y1) / (l2x2 - l2x1)
+            if self.slope == l2Slope:
+                return None
+            else:
+                xIntersect = ((l2y1 - (l2x1 * l2Slope)) - (self.yinit - (self.xinit * self.slope))) / (self.slope - l2Slope)
+                yIntersect = (self.slope * xIntersect) + (self.yinit - (self.xinit * self.slope))
+                yMax = max(self.yinit, self.yfinal)
+                yMin = min(self.yinit, self.yfinal)
+                if yMin <= yIntersect <= yMax:
+                    return xIntersect, yIntersect
+                else:
+                    return None
+
+    # Purposefully made to not detect when the line hits
+    def get_border_intersection(self):
+        # x = ZERO, y = ZERO | y = ZERO | x = w, y = ZERO
+        # --------------------------------------------------------------
+        # x = ZERO           |          | x = w
+        # --------------------------------------------------------------
+        # x = ZERO, y = w    | y = w    | x = w, y = w
+        yMin = min(self.yinit, self.yfinal)
+        yMax = max(self.yinit, self.yfinal)
+        if yMin < ZERO:
+            yIntersect = ZERO
+            if self.slope is not None:
+                xIntersect = (yIntersect - ) / self.slope
+        elif self.xfinal > self.screenW:
+            xIntersect = self.screenW
+
+        if self.yfinal < ZERO:
+            yIntersect = ZERO
+        elif self.yfinal > self.screenH:
+            yIntersect = self.screenH
+
+        if
+
+    def get_coords(self):
+        return self.xinit, self.yinit, self.xfinal, self.yfinal
+
+    def get_init_coords(self):
+        return self.xinit, self.yinit
+
+    def get_final_coords(self):
+        return self.xfinal, self.yfinal
+
+    def get_length_outside_screen(self):
+        # Get the x length of the line that is outside of the boundaries of the screen.
+        if self.xfinal < ZERO:
+            outsideX = self.xfinal - ZERO
+        elif self.xfinal > self.screenW:
+            outsideX = self.xfinal - self.screenW
+        else:
+            outsideX = 0
+
+        # Get the y length of the line that is outside of the boundaries of the screen.
+        if self.yfinal < ZERO:
+            outsideY = self.yfinal - ZERO
+        elif self.yfinal > self.screenH:
+            outsideY = self.yfinal - self.screenH
+        else:
+            outsideY = 0
+
+        return outsideX, outsideY
+
+
 class Puck(object):
     global mycoordlist
     """
@@ -222,18 +401,16 @@ class Puck(object):
         c, d = rand()  # generate psuedorandom directions.
         self.vx, self.vy = 4 * c, 6 * d
         self.a = 1  # friction
-        #self.cushion = self.w * 0.25
-        self.array_length = 0
+        # self.cushion = self.w * 0.25
         self.slope = 1
-        self.line = Linemanager(canvas, self.w * 2, (0, 0))
-        self.line2 =Linemanager(canvas, self.w * 2, (0, 0))
+        self.line1 = Line(self.can, self.background, self.w * 2)
+        self.line2 = Line(self.can, self.background, self.w * 2)
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
-
-    mycoordlist = []
-
+        # Record the last 5 positions of the puck
+        self.tracebackAmt = 5
+        self.coordList = None
 
     def update(self):
-        global mycoordlist
         global x, y
 
         # air hockey table - puck never completely stops.
@@ -253,85 +430,50 @@ class Puck(object):
 
         self.x, self.y = x, y
         self.puck.update((self.x, self.y))
+        self.line1.update_coordList(self.x, self.y)
 
-        mycoordlist.append([self.x, self.y])
-        self.array_length = len(mycoordlist)
-        # print(array_length)
+        if background.is_position_valid(line1.get_final_coords(), 0):
+            xOutside, yOutside = self.line1.get_length_outside_screen()
 
-        last_coordx, last_coordy = mycoordlist[self.array_length - 2]
+        L5 = ([0, self.screen[1]])
+        L6 = ([self.screen[0], self.screen[1]])
+        R2 = LineIntersection(L3, L4, L5, L6)
+        trigsolve2 = (self.w) / (
+            math.tan(math.atan((self.x + deltaX * 300 + R2[0]) / (self.y + deltaY * 300 + R2[1]))))
 
-        deltaX = self.x - last_coordx + 0.0001
-        deltaY = self.y - last_coordy + 0.0001
-        # line = self.can.create_line(0, 0 , 0, 0, fill=BLUE, width = 5)
-        slope = deltaX / deltaY
-
-        # root = Linemanager
-        # w = Canvas(root, width=200, height=200)
-        # w.pack()
-        # var = w.create_line(0, 0, 100, 100)
-        def LineIntersection(A, B, C, D):
-    # Line AB represented as a1x + b1y = c1
-            a1 = B[1] - A[1]
-            b1 = A[0] - B[0]
-            c1 = a1*(A[0]) + b1*(A[0])
-        
-            # Line CD represented as a2x + b2y = c2
-            a2 = D[1] - C[1]
-            b2 = C[0] - D[0]
-            c2 = a2*(C[0]) + b2*(C[1])
-        
-            determinant = a1*b2 - a2*b1
-            if (determinant == 0):
-            # The lines are parallel. This is simplified
-            # by returning a pair of FLT_MAX
-                print('no intersection')
-            else:
-                x = (b2*c1 - b1*c2)/determinant
-                y = (a1*c2 - a2*c1)/determinant
-            return (x, y)
-        
-        if deltaX > 0 and deltaY > 0:
-            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 30, self.y + deltaY * 30))
-            L3 = ([last_coordx, last_coordy])
-            L4 = ([self.x + deltaX * 30, self.y + deltaY * 30])
-            L5 = ([0,self.screen[1]])
-            L6 = ([self.screen[0],self.screen[1]])
-            R2 = LineIntersection(L3, L4, L5, L6)
-            trigsolve2 = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 + R2[0])/(self.y + deltaY * 300 + R2[1]))))
-
-            if R2[0] <= 960 and R2[1] == 540:
-                print ("Intersection detected:", R2)
-                self.line2.update_line((R2[0]- (trigsolve2), R2[1]+(self.w), (self.x + deltaX * 300) - (trigsolve2), -(self.y + deltaY * 300+self.w)))
-
-
+        if R2[0] <= 960 and R2[1] == 540:
+            print("Intersection detected:", R2)
+            self.line2.update_line((R2[0] - (trigsolve2), R2[1] + (self.w), (self.x + deltaX * 300) - (trigsolve2),
+                                    -(self.y + deltaY * 300 + self.w)))
 
         if deltaX > 0 and deltaY < 0:
 
             self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 30, self.y + deltaY * 30))
-            L1 = ([0,0])
-            L2 = ([self.screen[0],0])
+            L1 = ([0, 0])
+            L2 = ([self.screen[0], 0])
             L3 = ([last_coordx, last_coordy])
             L4 = ([self.x + deltaX * 30, self.y + deltaY * 30])
-            #L3 = ([0,self.screen[1]], [self.screen[0],self.screen[1]])
-            #print(L2)
+            # L3 = ([0,self.screen[1]], [self.screen[0],self.screen[1]])
+            # print(L2)
 
             R = LineIntersection(L1, L2, L3, L4)
-            #R2 = lineintersection(L2, L3)
+            # R2 = lineintersection(L2, L3)
             # figuring out the angle of intersection then the difference between center and edge intersection
-            trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 30 - R[0])/(self.y + deltaY * 30 - R[1]))))
-            #trigsolve2 = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R2[0])/(self.y + deltaY * 300 - R2[1]))))
+            trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 30 - R[0]) / (self.y + deltaY * 30 - R[1]))))
+            # trigsolve2 = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R2[0])/(self.y + deltaY * 300 - R2[1]))))
             if R[0] <= 960 and R[1] == 0:
-                print ("Intersection detected:", R)
-                self.line2.update_line((R[0]+ (trigsolve), R[1]+(self.w), (self.x + deltaX * 300) + (trigsolve), -(self.y + deltaY * 300+self.w)))
+                print("Intersection detected:", R)
+                self.line2.update_line((R[0] + (trigsolve), R[1] + (self.w), (self.x + deltaX * 300) + (trigsolve),
+                                        -(self.y + deltaY * 300 + self.w)))
             # if R2[0] <= 960 and R2[1] == 540:
             #     print ("Intersection detected:", R2)
             #     self.line2.update_line((R2[0]- (trigsolve2), R2[1]+(self.w), (self.x + deltaX * 300) - (trigsolve2), -(self.y + deltaY * 300+self.w)))
-            
-                
 
 
 
-        
+
+
+
         elif deltaX < -.5 and deltaY > 1.5 or deltaX < -.5 and deltaY < -1.5:
             self.line.update_line((0, 0, 0, 0))
 
@@ -342,7 +484,7 @@ class Puck(object):
 
         # print(mycoordlist)
 
-        #print(last_coordx, self.x, last_coordy, self.y)
+        # print(last_coordx, self.x, last_coordy, self.y)
 
         # print(self.x, self.y)
 
@@ -373,7 +515,6 @@ class Home(object):
         background = Background(self.can, screen, screen[0] * 0.33)
         self.puck = Puck(self.can, background)
         self.target = Target(self.can, background)
-        self.line = Line(self.can, background)
         # self.p1 = Player(master, self.can, background, self.puck, UPPER)
         # self.p2 = Player(master, self.can, background, self.puck, LOWER)
 
@@ -429,6 +570,6 @@ def play(screen):
 if __name__ == "__main__":
     """ Choose screen size """
     screen = 960, 540
-    #screen = 1920, 1080
+    # screen = 1920, 1080
 
     play(screen)
