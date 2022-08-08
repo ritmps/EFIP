@@ -12,7 +12,7 @@ else:
     import Tkinter as tk
 
 RED, BLACK, WHITE, DARK_RED, BLUE, LIGHT_GREEN = "red", "black", "white", "dark red", "blue", "light green"
-ZERO = 5  # for edges.
+ZERO = 1  # for edges.
 LOWER, UPPER = "lower", "upper"
 HOME, AWAY = "Top", "Bottom"
 # Should ALWAYS make a copy of START_SCORE before using it - START_SCORE.copy().
@@ -53,8 +53,9 @@ class Equitment(object):
         self.can, self.w = canvas, width
         self.x, self.y = position
 
-        self.Object = self.can.create_oval(self.x - self.w, self.y - self.w,
-                                           self.x + self.w, self.y + self.w, fill=color)
+        self.Object = self.can.create_oval(0, 0, 0, 0, fill=color)
+        # self.Object = self.can.create_oval(self.x - self.w, self.y - self.w,
+                                        #    self.x + self.w, self.y + self.w, fill=color)
 
     def update(self, position):
         self.x, self.y = position
@@ -163,8 +164,8 @@ class Background(object):
         if constraint == None and self.is_in_goal(position, width):
             return True
         # bounces
-        elif (x - width < ZERO or x + width > self.w or
-              y - width < ZERO or y + width > self.h):
+        elif (x < ZERO or x > self.w or
+              y < ZERO or y > self.h):
             return False
         # elif constraint == LOWER:
         # return y - width > self.h/2
@@ -227,7 +228,7 @@ class Puck(object):
         self.slope = 1
         self.line = Linemanager(canvas, self.w * 2, (0, 0))
         self.line2 =Linemanager(canvas, self.w * 2, (0, 0))
-        self.puck = PuckManager(canvas, self.w, (self.y, self.x))
+        self.puck = PuckManager(canvas, 5, (self.y, self.x))
 
     mycoordlist = []
 
@@ -269,65 +270,56 @@ class Puck(object):
         # w = Canvas(root, width=200, height=200)
         # w.pack()
         # var = w.create_line(0, 0, 100, 100)
-        def LineIntersection(A, B, C, D):
-    # Line AB represented as a1x + b1y = c1
-            a1 = B[1] - A[1]
-            b1 = A[0] - B[0]
-            c1 = a1*(A[0]) + b1*(A[0])
-        
-            # Line CD represented as a2x + b2y = c2
-            a2 = D[1] - C[1]
-            b2 = C[0] - D[0]
-            c2 = a2*(C[0]) + b2*(C[1])
-        
-            determinant = a1*b2 - a2*b1
-            if (determinant == 0):
-            # The lines are parallel. This is simplified
-            # by returning a pair of FLT_MAX
-                print('no intersection')
+        def line(p1, p2):
+            A = (p1[1] - p2[1])
+            B = (p2[0] - p1[0])
+            C = (p1[0]*p2[1] - p2[0]*p1[1])
+            return A, B, -C
+
+        def intersection(L1, L2):
+            D  = L1[0] * L2[1] - L1[1] * L2[0]
+            Dx = L1[2] * L2[1] - L1[1] * L2[2]
+            Dy = L1[0] * L2[2] - L1[2] * L2[0]
+            if D != 0:
+                x = Dx / D
+                y = Dy / D
+                return x,y
             else:
-                x = (b2*c1 - b1*c2)/determinant
-                y = (a1*c2 - a2*c1)/determinant
-            return (x, y)
-        
-        if deltaX > 0 and deltaY > 0:
-            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 30, self.y + deltaY * 30))
-            L3 = ([last_coordx, last_coordy])
-            L4 = ([self.x + deltaX * 30, self.y + deltaY * 30])
-            L5 = ([0,self.screen[1]])
-            L6 = ([self.screen[0],self.screen[1]])
-            R2 = LineIntersection(L3, L4, L5, L6)
-            trigsolve2 = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 + R2[0])/(self.y + deltaY * 300 + R2[1]))))
-
-            if R2[0] <= 960 and R2[1] == 540:
-                print ("Intersection detected:", R2)
-                self.line2.update_line((R2[0]- (trigsolve2), R2[1]+(self.w), (self.x + deltaX * 300) - (trigsolve2), -(self.y + deltaY * 300+self.w)))
-
+                return False
 
 
         if deltaX > 0 and deltaY < 0:
-
-            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 30, self.y + deltaY * 30))
-            L1 = ([0,0])
-            L2 = ([self.screen[0],0])
-            L3 = ([last_coordx, last_coordy])
-            L4 = ([self.x + deltaX * 30, self.y + deltaY * 30])
-            #L3 = ([0,self.screen[1]], [self.screen[0],self.screen[1]])
-            #print(L2)
-
-            R = LineIntersection(L1, L2, L3, L4)
-            #R2 = lineintersection(L2, L3)
-            # figuring out the angle of intersection then the difference between center and edge intersection
-            trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 30 - R[0])/(self.y + deltaY * 30 - R[1]))))
-            #trigsolve2 = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R2[0])/(self.y + deltaY * 300 - R2[1]))))
-            if R[0] <= 960 and R[1] == 0:
-                print ("Intersection detected:", R)
-                self.line2.update_line((R[0]+ (trigsolve), R[1]+(self.w), (self.x + deltaX * 300) + (trigsolve), -(self.y + deltaY * 300+self.w)))
-            # if R2[0] <= 960 and R2[1] == 540:
-            #     print ("Intersection detected:", R2)
-            #     self.line2.update_line((R2[0]- (trigsolve2), R2[1]+(self.w), (self.x + deltaX * 300) - (trigsolve2), -(self.y + deltaY * 300+self.w)))
+            #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
+            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 300, self.y + deltaY * 300))
+            L1 = line([0,0], [self.screen[0]-self.w,0])
+            L2 = line([last_coordx, last_coordy], [self.x + deltaX * 300, self.y + deltaY * 300])
             
+
+            R = intersection(L1, L2)
+            
+            # figuring out the angle of intersection then the difference between center and edge intersection
+            #trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R[0])/(self.y + deltaY * 300 - R[1]))))
+            if R[0] <= self.screen[0] and R[1] == 0:
+                print ("Intersection detected:", R)
                 
+                self.line2.update_line((R[0], R[1], (((R[0] - self.x) + R[0])+ deltaX*100), (self.y- deltaY*100)))
+            # else:
+            #     print ("No single intersection point detected")
+        if deltaX > 0 and deltaY > 0:
+            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 300, self.y + deltaY * 300))
+            L2 = line([last_coordx, last_coordy], [self.x + deltaX * 300, self.y + deltaY * 300])
+            L3 = line([0,self.screen[1]], [self.screen[0],self.screen[1]])
+            
+
+            R = intersection(L2, L3)
+            
+            # figuring out the angle of intersection then the difference between center and edge intersection
+            #trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R[0])/(self.y + deltaY * 300 - R[1]))))
+            if R[0] < 960 and R[1] == 540:
+                #print ("Intersect detected:", R, "ts:", "dx:", deltaX, "dy:", deltaY, "w:", self.w, "x:", self.x, "y:", self.y)
+                print((self.x + deltaX), (self.y + deltaY))
+                #print (R[0] + (trigsolve), R[1]+(self.w), (self.x + deltaX * 300) + (trigsolve), -(self.y + deltaY * 300+self.w))
+                self.line2.update_line((R[0], R[1], (((R[0] - self.x) + R[0]) +deltaX*100), (self.y- deltaY*100)))        
 
 
 
