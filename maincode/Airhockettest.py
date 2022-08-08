@@ -315,7 +315,7 @@ class Puck(object):
             
             # figuring out the angle of intersection then the difference between center and edge intersection
             #trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R[0])/(self.y + deltaY * 300 - R[1]))))
-            if R[0] < 960 and R[1] == 540:
+            if R[0] < self.screen[0] and R[1] == self.screen[1]:
                 #print ("Intersect detected:", R, "ts:", "dx:", deltaX, "dy:", deltaY, "w:", self.w, "x:", self.x, "y:", self.y)
                 print((self.x + deltaX), (self.y + deltaY))
                 #print (R[0] + (trigsolve), R[1]+(self.w), (self.x + deltaX * 300) + (trigsolve), -(self.y + deltaY * 300+self.w))
@@ -420,7 +420,8 @@ def play(screen):
 
 if __name__ == "__main__":
     """ Choose screen size """
-    screen = 960, 540
+    #screen = 960, 540
     #screen = 1920, 1080
+    screen = 1920, 920
 
     play(screen)
