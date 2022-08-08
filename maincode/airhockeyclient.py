@@ -224,6 +224,7 @@ class Puck(object):
         self.a = 1 #friction
         self.cushion = self.w*0.25
         self.line = Linemanager(canvas, self.w * 2, (0, 0))
+        self.line2 =Linemanager(canvas, self.w * 2, (0, 0))
         self.puck = PuckManager(canvas, self.w, (self.y, self.x))
         
     def update(self, puckx=None, pucky=None):
@@ -271,12 +272,60 @@ class Puck(object):
         
         deltaX = xcoordsock - last_coordx + 0.0001
         deltaY = ycoordsock - last_coordy + 0.0001
-        if deltaX > .5 and deltaY > 1.5 or deltaX > .5 and deltaY < -1.5:
+        def line(p1, p2):
+            A = (p1[1] - p2[1])
+            B = (p2[0] - p1[0])
+            C = (p1[0]*p2[1] - p2[0]*p1[1])
+            return A, B, -C
+
+        def intersection(L1, L2):
+            D  = L1[0] * L2[1] - L1[1] * L2[0]
+            Dx = L1[2] * L2[1] - L1[1] * L2[2]
+            Dy = L1[0] * L2[2] - L1[2] * L2[0]
+            if D != 0:
+                x = Dx / D
+                y = Dy / D
+                return x,y
+            else:
+                return False
+
+
+        if deltaX > 1.5 and deltaY < 1.5:
             #    w.coords(var, last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500, fill=BLUE, width = 5)
-            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 500, self.y + deltaY * 500))
-        elif deltaX < -.5 and deltaY > 1.5 or deltaX < -.5 and deltaY < -1.5:
-            self.line.update_line((0, 0, 0, 0))
- 
+            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 300, self.y + deltaY * 300))
+            L1 = line([0,0], [self.screen[0]-self.w,0])
+            L2 = line([last_coordx, last_coordy], [self.x + deltaX * 300, self.y + deltaY * 300])
+            
+
+            R = intersection(L1, L2)
+            
+            # figuring out the angle of intersection then the difference between center and edge intersection
+            #trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R[0])/(self.y + deltaY * 300 - R[1]))))
+            if R[0] <= self.screen[0] and R[1] == 0:
+                self.line2.update_line((R[0], R[1], (((R[0] - self.x) + R[0])+ deltaX*100), (self.y- deltaY*100)))
+            # else:
+            #     print ("No single intersection point detected")
+        if deltaX > 1.5 and deltaY > 1.5:
+            self.line.update_line((last_coordx, last_coordy, self.x + deltaX * 300, self.y + deltaY * 300))
+            L2 = line([last_coordx, last_coordy], [self.x + deltaX * 300, self.y + deltaY * 300])
+            L3 = line([0,self.screen[1]], [self.screen[0],self.screen[1]])
+            
+
+            R = intersection(L2, L3)
+            
+            # figuring out the angle of intersection then the difference between center and edge intersection
+            #trigsolve = (self.w) / (math.tan(math.atan((self.x + deltaX * 300 - R[0])/(self.y + deltaY * 300 - R[1]))))
+            if R[0] < self.screen[0] and R[1] == self.screen[1]:
+                #print ("Intersect detected:", R, "ts:", "dx:", deltaX, "dy:", deltaY, "w:", self.w, "x:", self.x, "y:", self.y)
+                print((self.x + deltaX), (self.y + deltaY))
+                #print (R[0] + (trigsolve), R[1]+(self.w), (self.x + deltaX * 300) + (trigsolve), -(self.y + deltaY * 300+self.w))
+                self.line2.update_line((R[0], R[1], (((R[0] - self.x) + R[0]) +deltaX*100), (self.y- deltaY*100)))        
+
+
+
+        
+        # elif deltaX < -.5 and deltaY > 1.5 or deltaX < -.5 and deltaY < -1.5:
+        #     self.line.update_line((0, 0, 0, 0))
     
     def __eq__(self, other):
         return other == self.puck
