@@ -405,6 +405,7 @@ def play(screen):
             
 if __name__ == "__main__":
     """ Choose screen size """  
-    screen = 1920, 1080
+    #screen = 1920, 1080
+    screen = 1920, 920
     play(screen)
 
