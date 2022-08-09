@@ -15,6 +15,7 @@ global HOST, PORT, screenW, screenW_2, screenH, screenH_2, tag_path, thread_runn
 
 verbose = True
 
+# Parse the command line arguments
 def args_parse():
     global HOST, PORT, screenW, screenW_2, screenH, screenH_2, tag_path, displays
     parser = argparse.ArgumentParser(description='Run GStreamer RTP stream')
@@ -35,6 +36,7 @@ def args_parse():
     tag_path = args.tag
     displays = args.displays
 
+    # If there are 2 displays, then the second screen width and height must be specified
     if displays == 2 and ((screenW_2 is None) or (screenH_2 is None)):
         print(f"[ERROR] Specified 2 displays but did not specify the following:")
         if screenW_2 is None:
@@ -53,7 +55,7 @@ def args_parse():
               f"[INFO] Tag path: {tag_path}\n"
               f"[INFO] Displays: {displays}")
 
-
+# Function for receiving data from the server
 def recvcoord():
     global thread_running
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -64,17 +66,21 @@ def recvcoord():
             data = data.decode('utf-8')
             data = eval(data)
 
+# This class is used to create the background of a tkinter canvas with ArUco tag ID: 5
 class Background(object):
     def __init__(self, master, inputScreenW, inputScreenH):
-        # Create a canvas on a tkinter frame
+        # Create a tkinter frame
         self.frame = tk.Frame(master)
         self.frame.pack()
-        self.can = tk.Canvas(self.frame,
-                             bd=0,
-                             highlightthickness=0,
-                             bg="black",
-                             width=inputScreenW,
-                             height=inputScreenH)
+        # Create a tkinter canvas
+        self.can = tk.Canvas(
+            self.frame,
+            bd=0,
+            highlightthickness=0,
+            bg="black",
+            width=inputScreenW,
+            height=inputScreenH
+        )
         self.can.pack()
         master.update()
 
@@ -104,14 +110,19 @@ class Background(object):
 
         # Add a white, 50 pixel border around the image so it can be seen by the camera better and place the image onto
         # the canvas
-        self.borderRect = self.can.create_rectangle(self.imgUpLeftX - 50,
-                                                    self.imgUpLeftY - 50,
-                                                    self.imgUpLeftX + self.imgW + 50,
-                                                    self.imgUpLeftY + self.imgH + 50,
-                                                    fill="white")
-        self.can.create_image(self.imgUpLeftX, self.imgUpLeftY, anchor=tk.NW, image=self.canImg)
-        # TODO: Add socket connection compatibility so that the image can be moved around the screen after the tag is
-        #       detected. ie, detect -> readjust position
+        self.borderRect = self.can.create_rectangle(
+            self.imgUpLeftX - 50,
+            self.imgUpLeftY - 50,
+            self.imgUpLeftX + self.imgW + 50,
+            self.imgUpLeftY + self.imgH + 50,
+            fill="white"
+        )
+        self.can.create_image(
+            self.imgUpLeftX, 
+            self.imgUpLeftY, 
+            anchor=tk.NW, 
+            image=self.canImg
+        )
 
 
 def start(inputScreenW=None, inputScreenH=None):
@@ -119,7 +130,7 @@ def start(inputScreenW=None, inputScreenH=None):
         inputScreenW = screenW
     if inputScreenH is None:
         inputScreenH = screenH
-    # Create a window and start it in fullscreen mode
+    # Create a window
     root = tk.Tk()
 
     # Account for if there are 2 displays
@@ -128,6 +139,7 @@ def start(inputScreenW=None, inputScreenH=None):
     else:
         root.geometry(f"{inputScreenW}x{inputScreenH}")
 
+    # This ensures the window fills the screen and is not resizable
     root.overrideredirect(1)
 
     # Create a background object
