@@ -2,6 +2,13 @@
 """ Air Hockey """
 
 import sys, random
+<<<<<<< Updated upstream
+=======
+from tkinter import Canvas
+from turtle import position
+import math
+import numpy as np
+>>>>>>> Stashed changes
 
 if sys.version_info.major > 2:
     import tkinter as tk
@@ -18,6 +25,10 @@ MAX_SCORE = 7 #Winning score.
 SPEED = 20 #milliseconds between frame update.
 FONT = "ms 50"
 MAX_SPEED, PADDLE_SPEED = 15, 15
+<<<<<<< Updated upstream
+=======
+verbose = True
+>>>>>>> Stashed changes
 
 #### METHODS ####
 
@@ -168,8 +179,238 @@ class Target(object):
         global x, y
         radius = self.t
         if posx + (radius) == x and posy + (radius) == y:
+<<<<<<< Updated upstream
             print ("target aquired")
         
+=======
+            print("target aquired")
+
+
+class Line(object):
+    def __init__(self, canvas, background, width, length=300, tracebackAmt=3, color=WHITE, verbose=verbose):
+        self.can = canvas
+        self.background = background
+        self.screenW, self.screenH = self.background.get_screen()
+        self.line_length = length
+        self.tracebackAmt = tracebackAmt
+        self.xinit, self.yinit = 0, 0
+        self.xfinal, self.yfinal = 0, 0
+        self.deltaX, self.deltaY = 0, 0
+        self.slope = 0
+        self.line = self.can.create_line(0, 0, 0, 0, fill=color, width=width)
+        self.coordList = None
+
+    # Adds the current position of the puck to the coordinate list. Takes care of updating most other things.
+    def update(self, puckX, puckY):
+        # Create a numpy array containing the last n coordinates of the puck's path.
+        # If coordList is not defined, define it as a numpy array with the x and y coordinate of the puck
+        if self.coordList is None:
+            self.coordList = np.array([[puckX, puckY]])
+        # If coordList is defined, append the x and y coordinate of the puck to the end of the array
+        else:
+            if self.coordList.shape[0] < self.tracebackAmt:
+                self.coordList = np.append(self.coordList, [[puckX, puckY]], axis=0)
+            # If coordList is full, remove the first row and append the new x and y coordinate of the puck
+            else:
+                self.coordList = np.delete(self.coordList, 0, 0)
+                self.coordList = np.append(self.coordList, [[puckX, puckY]], axis=0)
+
+                # Set the initial coordinates of the line to the current position of the puck
+                self.set_init_coords(puckX, puckY)
+
+                # Calculate the slope of the line between the initial coordinates and the current coordinates
+                self.calculate_slope(self.coordList[0, 0], self.coordList[0, 1], puckX, puckY)
+
+                # Calculate the final coordinates of the line
+                self.calculate_final_coords(puckX, puckY, self.slope)
+
+                # If the final coordinates of the line are outside of the screen, add a bounce line
+                if self.yfinal < ZERO:
+                    self.get_intersection(ZERO, ZERO, self.screenW, ZERO)
+
+                # Redraw the line
+                self.redraw()
+
+    # Set the initial coordinates of the line.
+    def set_init_coords(self, x, y):
+        self.xinit, self.yinit = x, y
+
+    # Calculate the slope of the line between a previous position and the line's initial coordinates
+    def calculate_slope(self, initX, initY, finalX=None, finalY=None):
+        if finalX is None:
+            finalX = self.xinit
+        if finalY is None:
+            finalY = self.yinit
+        self.deltaX = finalX - initX
+        self.deltaY = finalY - initY
+        # Avoid division by zero error
+        if self.deltaX == 0:
+            self.slope = None
+        else:
+            self.slope = self.deltaY / self.deltaX
+        if verbose:
+            print(f'[INFO] DeltaX: {self.deltaX} \n'
+                  f'[INFO] DeltaY: {self.deltaY} \n'
+                  f'[INFO] Slope: {self.slope}')
+
+    # Calculate the final coordinates of the line. Equations were simplified from:
+    # x = x0 + (line_length * cos(arctan(slope)))
+    # y = y0 + (line_length * sin(arctan(slope)))
+    def calculate_final_coords(self, initX, initY, slope):
+        if slope is not None:
+            if verbose:
+                print(f'[INFO] CoordList: {self.coordList}')
+            if self.coordList[0][0] < self.coordList[self.tracebackAmt - 1][0]:
+                self.xfinal = initX + (self.line_length / math.sqrt(1 + (slope ** 2)))
+            elif self.coordList[0][0] > self.coordList[self.tracebackAmt - 1][0]:
+                self.xfinal = initX - (self.line_length / math.sqrt(1 + (slope ** 2)))
+            if self.coordList[0][1] < self.coordList[self.tracebackAmt - 1][1]:
+                self.yfinal = initY + ((self.line_length * slope) / (math.sqrt(1 + (slope ** 2))))
+            elif self.coordList[0][1] > self.coordList[self.tracebackAmt - 1][1]:
+                self.yfinal = initY - ((self.line_length * slope) / (math.sqrt(1 + (slope ** 2))))
+
+    # def calculate_outside_length(self, slope, initX, initY, finalX, finalY):
+    #     if slope is None:
+    #         return None
+    #     else:
+
+    # Get the intersection point between two lines
+    def get_intersection(self, l2x1, l2y1, l2x2, l2y2):
+        if (self.xfinal - self.xinit == 0) and (not (l2x2 - l2x1 == 0)):
+            self.slope = None
+            l2Slope = (l2y2 - l2y1) / (l2x2 - l2x1)
+            xIntersect = self.xinit
+            yIntersect = (l2Slope * xIntersect) + (l2y1 - (l2x1 * l2Slope))
+            yMax = max(self.yinit, self.yfinal)
+            yMin = min(self.yinit, self.yfinal)
+            if yMin <= yIntersect <= yMax:
+                return xIntersect, yIntersect
+            else:
+                return None
+        elif (not (self.xfinal - self.xinit == 0)) and (l2x2 - l2x1 == 0):
+            self.slope = (self.yfinal - self.yinit) / (self.xfinal - self.xinit)
+            l2Slope = None
+            xIntersect = l2x1
+            yIntersect = (self.slope * xIntersect) + (self.yinit - (self.xinit * self.slope))
+            yMax = max(self.yinit, self.yfinal)
+            yMin = min(self.yinit, self.yfinal)
+            if yMin <= yIntersect <= yMax:
+                return xIntersect, yIntersect
+            else:
+                return None
+        elif (self.xfinal - self.xinit == 0) and (l2x2 - l2x1 == 0):
+            self.slope = None
+            return None
+        else:
+            self.slope = (self.yfinal - self.yinit) / (self.xfinal - self.xinit)
+            l2Slope = (l2y2 - l2y1) / (l2x2 - l2x1)
+            if self.slope == l2Slope:
+                return None
+            else:
+                xIntersect = ((l2y1 - (l2x1 * l2Slope)) - (self.yinit - (self.xinit * self.slope))) / (
+                            self.slope - l2Slope)
+                yIntersect = (self.slope * xIntersect) + (self.yinit - (self.xinit * self.slope))
+                yMax = max(self.yinit, self.yfinal)
+                yMin = min(self.yinit, self.yfinal)
+                if yMin <= yIntersect <= yMax:
+                    return xIntersect, yIntersect
+                else:
+                    return None
+
+    def get_init_coords(self):
+        return self.xinit, self.yinit
+
+    def get_slope(self):
+        return self.slope
+
+    def get_final_coords(self):
+        return self.xfinal, self.yfinal
+
+    def redraw(self, xInit=None, yInit=None, xFinal=None, yFinal=None):
+        if xInit is None:
+            xInit = self.xinit
+        if yInit is None:
+            yInit = self.yinit
+        if xFinal is None:
+            xFinal = self.xfinal
+        if yFinal is None:
+            yFinal = self.yfinal
+        self.can.coords(self.line, xInit, yInit, xFinal, yFinal)
+
+    # def update(self, xInit, yInit, xfinal=None, yfinal=None, slope=None):
+    #     if (xfinal is not None) or (yfinal is not None):
+    #         self.xinit, self.yinit, self.xfinal, self.yfinal = xInit, yInit, xfinal, yfinal
+    #         self.can.coords(self.line, xInit, yInit, xInit, yInit)
+    #     elif slope is not None:
+    #         self.slope = slope
+    #         self.xinit, self.yinit = xInit, yInit
+    #         self.xfinal, self.yfinal = (xInit + (self.slope * self.line_length)), (yInit + (self.slope * self.line_length))
+    #         self.can.coords(self.line, xInit, yInit, xfinal, yfinal)
+    #
+    # def hide(self):
+    #     self.can.coords(self.line, 0, 0, 0, 0)
+    #
+    # def show(self):
+    #     self.can.coords(self.line, self.xinit, self.yinit, self.xfinal, self.yfinal)
+    #     # self.w = self.background.get_goal_h()/12
+    #
+    #
+    # # Purposefully made to not detect when the line hits left and right walls of playing field
+    # def get_border_intersection(self):
+    #     # x = ZERO, y = ZERO | y = ZERO | x = w, y = ZERO
+    #     # --------------------------------------------------------------
+    #     # x = ZERO           |          | x = w
+    #     # --------------------------------------------------------------
+    #     # x = ZERO, y = w    | y = w    | x = w, y = w
+    #     yMin = min(self.yinit, self.yfinal)
+    #     yMax = max(self.yinit, self.yfinal)
+    #     if yMin < ZERO:
+    #         yIntersect = ZERO
+    #         if self.slope is not None:
+    #             xIntersect = (yIntersect - (self.yinit - (self.xinit * self.slope))) / self.slope
+    #             return xIntersect, yIntersect
+    #         elif self.slope is None:
+    #             xIntersect = self.xinit
+    #             return xIntersect, yIntersect
+    #     elif yMax > self.screenH:
+    #         yIntersect = self.screenH
+    #         if self.slope is not None:
+    #             xIntersect = (yIntersect - (self.yinit - (self.xinit * self.slope))) / self.slope
+    #             return xIntersect, yIntersect
+    #         elif self.slope is None:
+    #             xIntersect = self.xinit
+    #             return xIntersect, yIntersect
+    #     else:
+    #         return None, None
+    #
+    # def get_coords(self):
+    #     return self.xinit, self.yinit, self.xfinal, self.yfinal
+    #
+    # def get_init_coords(self):
+    #     return self.xinit, self.yinit
+    #
+    # def get_final_coords(self):
+    #     return self.xfinal, self.yfinal
+    #
+    # def get_length_outside_screen(self):
+    #     # Get the x length of the line that is outside of the boundaries of the screen.
+    #     if self.xfinal < ZERO:
+    #         outsideX = self.xfinal - ZERO
+    #     elif self.xfinal > self.screenW:
+    #         outsideX = self.xfinal - self.screenW
+    #     else:
+    #         outsideX = 0
+    #
+    #     # Get the y length of the line that is outside of the boundaries of the screen.
+    #     if self.yfinal < ZERO:
+    #         outsideY = self.yfinal - ZERO
+    #     elif self.yfinal > self.screenH:
+    #         outsideY = self.yfinal - self.screenH
+    #     else:
+    #         outsideY = 0
+    #
+    #     return outsideX, outsideY
+>>>>>>> Stashed changes
 
 
       
@@ -206,6 +447,19 @@ class Puck(object):
             
         self.x, self.y = x, y
         self.puck.update((self.x, self.y))
+<<<<<<< Updated upstream
+=======
+        self.line1.update(self.x, self.y)
+
+        # if not self.background.is_position_valid(self.line1.get_final_coords(), 0):
+        #     xOutside, yOutside = self.line1.get_length_outside_screen()
+        #     intersectx, intersecty = self.line1.get_border_intersection()
+        #     # if intersectx is not None:
+        #     #     self.line2.update(intersectx, intersecty)
+
+    def get_line_coords(self):
+        return self.x, self.y, self.slope
+>>>>>>> Stashed changes
 
     # def hit(self, paddle, moving):
     #     x, y = paddle.get_position()
