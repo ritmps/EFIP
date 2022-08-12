@@ -1,4 +1,5 @@
 import argparse
+import math
 import time
 import imutils
 import cv2
@@ -195,25 +196,22 @@ def detect_aruco(image):
 	
     # detect aruco tags
     parameters = cv2.aruco.DetectorParameters_create()
-    corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(image, cv2.aruco.DICT_5X5_100, parameters=parameters)
+    corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(image, arucoDict, parameters=parameters)
 
     if len(corners) > 0:
         ids = ids.flatten()
         for (markerCorner, markerID) in zip(corners, ids):
             # Extract the marker corners (returned in order: top left, top right, bottom right, bottom left)
-            corners = markerCorner.reshape((4, 2))
-            (topLeft, topRight, bottomRight, bottomLeft) = corners
+            cornersTemp = markerCorner.reshape((4, 2))
+            (topLeft, topRight, bottomRight, bottomLeft) = cornersTemp
 
             topRight = (int(topRight[0]), int(topRight[1]))
             bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
             bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
             topLeft = (int(topLeft[0]), int(topLeft[1]))
-
-            cX = int((topLeft[0] + bottomRight[0]) / 2.0)
-            cY = int((topLeft[1] + bottomRight[1]) / 2.0)
     
     avgDetectTime.update('detecting aruco tags')
-    return corners, ids, rejectedImgPoints
+    return corners, ids
 
 # Returns corners, ids, rejected image points, and marks up an image using the detected points
 def detect_aruco_markup(image):
@@ -228,8 +226,8 @@ def detect_aruco_markup(image):
         ids = ids.flatten()
         for (markerCorner, markerID) in zip(corners, ids):
             # Extract the marker corners (returned in order: top left, top right, bottom right, bottom left)
-            corners = markerCorner.reshape((4, 2))
-            (topLeft, topRight, bottomRight, bottomLeft) = corners
+            singleCorners = markerCorner.reshape((4, 2))
+            (topLeft, topRight, bottomRight, bottomLeft) = singleCorners
 
             topRight = (int(topRight[0]), int(topRight[1]))
             bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
@@ -250,7 +248,215 @@ def detect_aruco_markup(image):
             cv2.putText(image, str(markerID), (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     avgDetectTime.update('detecting aruco tags')
-    return image, corners, ids, rejectedImgPoints
+    return image, corners, ids
+
+# dimensions of the table:
+# length = ~ 74.375 inches
+# width = ~ 36.6875 inches
+# distance between circles and top / bottom of table = ~ 6.6875 inches
+# distance between circles and left / right of table = ~ 12.1875 inches
+# distance between circles lengthwise = ~ 46 inches
+# distance between circles widthwise = ~ 23.3125 inches
+class homographyGenerator:
+    def __init__(self, maxiter=100):
+        self.length = 74.375
+        self.width = 36.6875
+        self.circle_distance_top_bottom = 6.6875
+        self.circle_distance_left_right = 12.1875
+        self.circle_distance_lengthwise = 46
+        self.circle_distance_widthwise = 23.3125
+        self.avgCorners = None
+        self.centers = None
+        self.idealcenters = None
+        self.iterations = 1
+
+        # Dictionary to help keep track of indices in arrays
+        self.dict = {
+            'TL': 0,
+            'TR': 1,
+            'BR': 2,
+            'BL': 3,
+            'x': 0,
+            'y': 1
+        } 
+    
+    # KEEP IN MIND THIS PROGRAM ONLY ACCEPTS ARUCO TAGS WITH IDS 1-5
+    def updateCorners(self, corners, ids):
+        # Check if any markers were detected
+        if len(ids) > 0:
+            # Check if the average corners array has been initialized
+            if self.avgCorners is None:
+                for (markerCorner, markerID) in zip(corners, ids):
+                    if verbose:
+                        print(f'[INFO] Marker ID: {markerID}')
+                    # Extract each of the detected marker's corners (returned in order: top left, top right, bottom right, bottom left)
+                    singleCorners = markerCorner.reshape((4, 2))
+                    (topLeft, topRight, bottomRight, bottomLeft) = singleCorners
+
+                    topLeft = (int(topLeft[0]), int(topLeft[1]))
+                    topRight = (int(topRight[0]), int(topRight[1]))
+                    bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
+                    bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
+
+                    # If the row is 0, then 
+                    if row == 0:
+                        self.avgCorners = np.array([[topLeft, topRight, bottomRight, bottomLeft]])
+                        if verbose:
+                            print(f'[INFO] Average Corners: {self.avgCorners}')
+                    else:
+                        self.avgCorners = np.vstack((self.avgCorners, [[topLeft, topRight, bottomRight, bottomLeft]]))
+                    self.dict[markerID] = row
+                    row += 1
+            # If average corners is defined, then update it.
+            else:
+                for (markerCorner, markerID) in zip(corners, ids):
+                    # If the marker is in the dictionary already, update the average corners
+                    if markerID in self.dict:
+                        row = self.dict[markerID]
+                        singleCorners = markerCorner.reshape((4, 2))
+                        (topLeft, topRight, bottomRight, bottomLeft) = singleCorners
+
+                        topLeft = (int(topLeft[0]), int(topLeft[1]))
+                        topRight = (int(topRight[0]), int(topRight[1]))
+                        bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
+                        bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
+
+                        self.avgCorners[row][self.dict['TL']] = (
+                            (self.avgCorners[row][0][0] + ((topLeft[0] - self.avgCorners[row][0][0]) / self.iterations)),
+                            (self.avgCorners[row][0][1] + ((topLeft[1] - self.avgCorners[row][0][1]) / self.iterations))
+                        )
+                        self.avgCorners[row][self.dict['TR']] = (
+                            (self.avgCorners[row][1][0] + ((topRight[0] - self.avgCorners[row][1][0]) / self.iterations)),
+                            (self.avgCorners[row][1][1] + ((topRight[1] - self.avgCorners[row][1][1]) / self.iterations))
+                        )
+                        self.avgCorners[row][self.dict['BR']] = (
+                            (self.avgCorners[row][2][0] + ((bottomRight[0] - self.avgCorners[row][2][0]) / self.iterations)),
+                            (self.avgCorners[row][2][1] + ((bottomRight[1] - self.avgCorners[row][2][1]) / self.iterations))
+                        )
+                        self.avgCorners[row][self.dict['BL']] = (
+                            (self.avgCorners[row][3][0] + ((bottomLeft[0] - self.avgCorners[row][3][0]) / self.iterations)),
+                            (self.avgCorners[row][3][1] + ((bottomLeft[1] - self.avgCorners[row][3][1]) / self.iterations))
+                        )
+                    # If the marker is not in the dictionary, add it to the dictionary and the average corners array
+                    else:
+                        row = self.avgCorners.shape[0] - 1
+                        singleCorners = markerCorner.reshape((4, 2))
+                        (topLeft, topRight, bottomRight, bottomLeft) = singleCorners
+
+                        topLeft = (int(topLeft[0]), int(topLeft[1]))
+                        topRight = (int(topRight[0]), int(topRight[1]))
+                        bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
+                        bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
+
+                        self.avgCorners = np.vstack((self.avgCorners, [[topLeft, topRight, bottomRight, bottomLeft]]))
+                        self.dict({markerID:row})
+
+        # Increment the iteration number
+        self.iterations += 1        
+
+    # def updateCenters(self, corners):
+    #     for row in range(self.avgCorners.shape[0]):
+    #         # Extract the marker corners (returned in order: top left, top right, bottom right, bottom left)
+    #         singleCorners = markerCorner.reshape((4, 2))
+    #         (topLeft, topRight, bottomRight, bottomLeft) = singleCorners
+
+    #         topRight = (int(topRight[0]), int(topRight[1]))
+    #         bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
+
+    #         # Calculate the center of the marker
+    #         cX = (topLeft[0] + bottomRight[0]) / 2.0
+    #         cY = (topLeft[1] + bottomRight[1]) / 2.0
+
+    #         # If there is nothing in the list, add the center of the marker to the list
+    #         # Final value in the list is the iteration number for the given marker
+    #         if self.avgCenters == None:
+    #             self.avgCenters = np.array([[markerID, cX, cY, 1]])
+            
+    #         # If the markerID is already in the list, average the center of the marker with the existing center
+    #         elif (markerID in self.avgCenters[:, 0]):
+    #             row = np.where(self.avgCenters[:, 0] == markerID)
+    #             self.avgCenters[row, 1] = self.avgCenters[row, 1] + ((cX - self.avgCenters[row, 1]) / self.avgCenters[row, 3])
+    #             self.avgCenters[row, 2] = self.avgCenters[row, 2] + ((cY - self.avgCenters[row, 2]) / self.avgCenters[row, 3])
+    #             self.avgCenters[row, 3] = self.avgCenters[row, 3] + 1
+            
+    #         # If the markerID is not in the list, add the center of the marker to the list
+    #         else:
+    #             avgCenters = np.vstack((avgCenters, [markerID, cX, cY, 1]))
+
+    # def genHomographyInit(self, corners, ids, img=None):
+        # Find centers for id 1, 2, 3, and 4 and get their coordinates
+        
+
+    #     if (1 in avgCenters[:, 0]):
+    #         row = np.where(avgCenters[:, 0] == 1)
+    #         c1 = (avgCenters[row, 1], avgCenters[row, 2])
+    #     else:
+    #         exit('[ERROR] ID 1 NOT FOUND IN AVERAGE CENTERS')
+    #     if (2 in avgCenters[:, 0]):
+    #         row = np.where(avgCenters[:, 0] == 2)
+    #         c2 = (avgCenters[row, 1], avgCenters[row, 2])
+    #     else:
+    #         exit('[ERROR] ID 2 NOT FOUND IN AVERAGE CENTERS')
+    #     if (3 in avgCenters[:, 0]):
+    #         row = np.where(avgCenters[:, 0] == 3)
+    #         c3 = (avgCenters[row, 1], avgCenters[row, 2])
+    #     else:
+    #         exit('[ERROR] ID 2 NOT FOUND IN AVERAGE CENTERS')
+    #     if (4 in avgCenters[:, 0]):
+    #         row = np.where(avgCenters[:, 0] == 4)
+    #         c4 = (avgCenters[row, 1], avgCenters[row, 2])
+    #     else:
+    #         exit('[ERROR] ID 2 NOT FOUND IN AVERAGE CENTERS')
+        
+    #     # Find distance between c1 and c2
+    #     if (((c1[0] - c2[0]) ** 2) + ((c1[1] - c2[1]) ** 2)) < 0:
+    #         dstBtwCtrs_1_2 = math.sqrt(((c2[0] - c1[0]) ** 2) + ((c2[1] - c1[1]) ** 2))
+    #     else:
+    #         dstBtwCtrs_1_2 = -math.sqrt(((c1[0] - c2[0]) ** 2) + ((c1[1] - c2[1]) ** 2))
+        
+    #     # Find distance between c1 and c3
+    #     if (((c1[0] - c3[0]) ** 2) + ((c1[1] - c3[1]) ** 2)) < 0:
+    #         dstBtwCtrs_1_3 = math.sqrt(((c3[0] - c1[0]) ** 2) + ((c3[1] - c1[1]) ** 2))
+    #     else:
+    #         dstBtwCtrs_1_3 = -math.sqrt(((c1[0] - c3[0]) ** 2) + ((c1[1] - c3[1]) ** 2))
+
+    #     # Find which coordinate has the largest y value (bottom of image) and calculate the ideal image
+    #     # point which is dstBtwCtrs_1_2 away from the coordinate with the lowest y value (correct rotation)
+    #     if c1[1] > c2[1]:
+    #         idealc1 = (c1[0], c1[1])
+    #         idealc2 = (c1[0] + dstBtwCtrs_1_2, c1[1])
+    #         idealc3 = (c1[0], c1[1] + dstBtwCtrs_1_3)
+    #         idealc4 = (c1[0] + dstBtwCtrs_1_2, c1[1] + dstBtwCtrs_1_3)
+    #     else:
+    #         idealc1 = (c2[0] + dstBtwCtrs_1_2, c2[1])
+    #         idealc2 = (c2[0], c2[1])
+    #         idealc3 = (c2[0] + dstBtwCtrs_1_2, c2[1] - dstBtwCtrs_1_3)
+    #         idealc4 = (c2[0], c2[1] - dstBtwCtrs_1_3)
+
+    #     # Create 2 lists of points to be used in the homography
+    #     ptsInit = np.array([[[c1[0], c1[1]]], 
+    #                         [[c2[0], c2[1]]],
+    #                         [[c3[0], c3[1]]],
+    #                         [[c4[0], c4[1]]]], np.float32)
+    #     ptsInit = ptsInit.reshape((4, 1, 2))
+    #     print(f'[INFO] SHAPE: {ptsInit.shape}')
+    #     print(f'[INFO] PTS: {ptsInit}')
+    #     ptsProj = np.array([[[idealc1[0], idealc1[1]]], 
+    #                         [[idealc2[0], idealc2[1]]],
+    #                         [[idealc3[0], idealc3[1]]],
+    #                         [[idealc4[0], idealc4[1]]]], np.float32)
+    #     ptsProj = ptsProj.reshape((4, 1, 2))
+    #     print(f'[INFO] SHAPE: {ptsProj.shape}')
+    #     print(f'[INFO] PTS: {ptsProj}')
+
+    #     # Calculate the homography
+    #     h, status = cv2.findHomography(ptsInit, ptsProj)
+
+    #     # Apply the homography to the image
+    #     img_warped = cv2.warpPerspective(img, h, (1920, 1080))
+    #     return img_warped
+
+homographyGen = homographyGenerator()
 
 def read_cam():
     global img, stop_thread, verbose
@@ -289,8 +495,9 @@ def read_cam():
               '\n--------------------------------------------------\n')
         exit()
 
+    iter = 0
+
     if verbose:
-        iter = 0
         loop_verbose = True
     elif not verbose:
         loop_verbose = False
@@ -300,8 +507,8 @@ def read_cam():
         time.sleep(2.0)
         while True:
             try:
+                iter = iter + 1
                 if loop_verbose:
-                    iter = iter + 1
                     if iter % 50 == 0:
                         verbose = True
                     else:
@@ -312,19 +519,27 @@ def read_cam():
                 if not ret_val:
                     break
                 
-                # Undistort the image
-                undist_img = undistort_img(img, lutmapx, lutmapy)
+                if iter < 100:
+                    # Undistort the image
+                    undist_img = undistort_img(img, lutmapx, lutmapy)
 
-                # Detect aruco tags
-                arucoimg, corners, ids, rejectedImgPoints = detect_aruco_markup(undist_img)
+                    # Detect aruco tags
+                    arucoImg, corners, ids = detect_aruco_markup(undist_img)
                     
-                # if verbose:
-                #     print(f'[INFO] CORNERS: {corners}\n' \
-                #           f'[INFO] IDs: {ids}\n' \
-                #           f'[INFO] REJECTED IMAGE POINTS: {rejectedImgPoints}')
+                    homographyGen.updateCorners(corners, ids)
 
-                out.write(arucoimg)
-                cv2.waitKey(1)
+                    out.write(arucoImg)
+                    cv2.waitKey(1)
+                else:
+                    # Undistort the image
+                    undist_img = undistort_img(img, lutmapx, lutmapy)
+
+                    # Detect aruco tags
+                    arucoImg, corners, ids = detect_aruco_markup(undist_img)
+
+                    # Write the image to the Gstreamer stream
+                    out.write(arucoImg)
+                    cv2.waitKey(1)
             except KeyboardInterrupt:
                 break
     else:

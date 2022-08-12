@@ -2,13 +2,10 @@
 """ Air Hockey """
 
 import sys, random
-<<<<<<< Updated upstream
-=======
 from tkinter import Canvas
 from turtle import position
 import math
 import numpy as np
->>>>>>> Stashed changes
 
 if sys.version_info.major > 2:
     import tkinter as tk
@@ -25,10 +22,7 @@ MAX_SCORE = 7 #Winning score.
 SPEED = 20 #milliseconds between frame update.
 FONT = "ms 50"
 MAX_SPEED, PADDLE_SPEED = 15, 15
-<<<<<<< Updated upstream
-=======
 verbose = True
->>>>>>> Stashed changes
 
 #### METHODS ####
 
@@ -179,11 +173,8 @@ class Target(object):
         global x, y
         radius = self.t
         if posx + (radius) == x and posy + (radius) == y:
-<<<<<<< Updated upstream
             print ("target aquired")
-        
-=======
-            print("target aquired")
+
 
 
 class Line(object):
@@ -410,8 +401,6 @@ class Line(object):
     #         outsideY = 0
     #
     #     return outsideX, outsideY
->>>>>>> Stashed changes
-
 
       
 class Puck(object):
@@ -447,8 +436,6 @@ class Puck(object):
             
         self.x, self.y = x, y
         self.puck.update((self.x, self.y))
-<<<<<<< Updated upstream
-=======
         self.line1.update(self.x, self.y)
 
         # if not self.background.is_position_valid(self.line1.get_final_coords(), 0):
@@ -459,7 +446,6 @@ class Puck(object):
 
     def get_line_coords(self):
         return self.x, self.y, self.slope
->>>>>>> Stashed changes
 
     # def hit(self, paddle, moving):
     #     x, y = paddle.get_position()
